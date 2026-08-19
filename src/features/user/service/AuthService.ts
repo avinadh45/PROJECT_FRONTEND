@@ -5,10 +5,11 @@ import type {
   AuthResponse,
   VerifyOtpDTO,
 } from "../interface/authinterface";
+import type{ VehicleApiResponse,VehicleListApiResponse } from "../interface/vehicleIntraface";
 import { API_ROUTES } from "../../../shared/api/apiRoutes";
 
 export const Register = async (data: RegisterDTO): Promise<AuthResponse> => {
-  const { confirmPassword,...user} = data
+  const {...user} = data
   const response = await axiosClient.post(API_ROUTES.USER.REGISTER, user);
   return response.data;
 };
@@ -48,12 +49,37 @@ export const resetPassword = async (
 
 export const googleLogin = async (token: string): Promise<AuthResponse> => {
   const response = await axiosClient.post(API_ROUTES.USER.GOOGLE_LOGIN, {token});
- 
-
   return response.data;
 };
-
 export const logout = async()=>{
-  return await axiosClient.post(API_ROUTES.USER.LOGOUT)
-  
+  return await axiosClient.post(API_ROUTES.USER.LOGOUT) 
+}
+
+export const addVehicle = async(formData:FormData):Promise<VehicleApiResponse>=>{
+  const response = await axiosClient.post(API_ROUTES.VEHICLE.ADD,formData,{
+    headers:{ "Content-Type":"multipart/form-data"},
+  })
+  return response.data
+}
+
+export const getMyVehicle = async():Promise<VehicleListApiResponse>=>{
+  const response = await axiosClient.get(API_ROUTES.VEHICLE.GET_VEHICLE) 
+  return response.data 
+}
+
+export const updateVehicle = async(id:string,formData:FormData):Promise<VehicleApiResponse>=>{
+
+  const responce = await axiosClient.put(API_ROUTES.VEHICLE.UPDATE_VEHICLE(id),formData,{
+    headers:{"Content-Type":"multipart/form-data"}
+  })
+  return responce.data
+}
+
+export const getVehicleById = async(id:string):Promise<VehicleApiResponse>=>{
+  const vehicle = await axiosClient.get(API_ROUTES.VEHICLE.GET_VEHICLE_BY_ID(id)) 
+  return vehicle.data 
+}
+
+export const deleteVehicle_API = async(id:string):Promise<void>=>{
+  return await axiosClient.delete(API_ROUTES.VEHICLE.DELETE(id))
 }

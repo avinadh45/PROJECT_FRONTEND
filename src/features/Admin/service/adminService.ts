@@ -7,7 +7,10 @@ import type {
   UserDetailsDTO,
   PaginatedResponse,
   CategoryPaginationResponse,
-  ServiceCenterDetailsDTO
+  ServiceCenterDetailsDTO,
+  SubscriptionCreatePayload,
+  Subscription,
+  SubscriptionUpdatePayload
 } from "../interface/adminInterface";
 import { API_ROUTES } from "../../../shared/api/apiRoutes";
 
@@ -22,12 +25,12 @@ export const adminLogin = async (
 
 export const userList = async (page:number,limit:number,search:string = ""): Promise<PaginatedResponse<UserListDTO>> => {
   const user = await axiosClient.get(API_ROUTES.ADMIN.USER_LIST(page,limit,search));
-  return user.data;
+  return user.data.data;
 };
 
 export const serviceCnterList = async (page:number,limit:number,search:string = ""): Promise<PaginatedResponse<ServiceCenterListDTO>> => {
   const serviceCenter = await axiosClient.get(API_ROUTES.ADMIN.SERVICE_CENTER_LIST(page,limit,search));
-  return serviceCenter.data;
+  return serviceCenter.data.data;
 };
 
 export const userDetails = async (id: string): Promise<UserDetailsDTO> => {
@@ -99,7 +102,7 @@ export const block = async (id: string) => {
 };
 export const verifyServiceCenter = async()=>{
   const servicenterCenters = await axiosClient.get(API_ROUTES.ADMIN.VERIFY_SERVICE_CENTER)
-  return servicenterCenters.data 
+  return servicenterCenters.data.data; 
 }
 export const verifiDetails = async(id:string)=>{
   const response = await axiosClient.get(API_ROUTES.ADMIN.VERIFY_DETAILS(id))
@@ -111,4 +114,31 @@ export const acceptVerification = async(id:string)=>{
 }
 export const rejectVerification = async(id:string,rejectionReason:string)=>{
   return await axiosClient.patch(API_ROUTES.ADMIN.REJECT_SERVICE_CENTER(id),{rejectionReason})
+}
+
+export const checkCategoryName = async(name:string)=>{
+  const res = await axiosClient.get(API_ROUTES.ADMIN.CHECK_CATEGORY_NAME(name))
+  return res.data.data.exist
+}
+export const AddSubscription = async(data:SubscriptionCreatePayload)=>{
+
+  const res = await axiosClient.post(API_ROUTES.SUBSCRIPTION.ADD_SUBSCRIPTION,data)
+  return res.data.data
+}
+
+export const ListSubscription = async(page:number,limit:number,search:string=""):Promise<PaginatedResponse<Subscription>> =>{
+
+  const res = await axiosClient.get(API_ROUTES.SUBSCRIPTION.LIST_SUBSCRIPTION(page,limit,search))
+  return res.data.data
+}
+
+export const UpdateSubscription = async(id:string,data:SubscriptionUpdatePayload):Promise<Subscription>=>{
+
+  const res = await axiosClient.patch(API_ROUTES.SUBSCRIPTION.UPDATE_SUBSCRIPTION(id),data)
+  return res.data.data
+}
+
+export const DeleteSubscription = async(id:string):Promise<void>=>{
+
+  return await axiosClient.delete(API_ROUTES.SUBSCRIPTION.DELETE_SUBSCRIPTION(id))
 }

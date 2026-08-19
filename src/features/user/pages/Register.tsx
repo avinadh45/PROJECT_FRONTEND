@@ -11,7 +11,8 @@ const [name, setName] = useState("");
 const [password, setPassword] = useState("");
 const [confirmPassword, setConfirmPassword] = useState("");
 const [phoneNumber, setPhoneNumber] = useState("");
-
+  const [errors, setErrors] =
+  useState<Record<string, string>>({});
   return (
     <div className="min-h-screen bg-[#0a0d14] flex overflow-hidden font-sans">
       {/* ── Left panel: branding ── */}
@@ -129,8 +130,11 @@ const [phoneNumber, setPhoneNumber] = useState("");
             </div>
           )}
 
-          <form onSubmit={(e)=>{e.preventDefault();auth.handleRegister({
-            name,email,password,confirmPassword,phoneNumber
+          <form onSubmit={(e)=>{e.preventDefault();if(password !== confirmPassword){
+            setErrors({ confirmPassword: "Passwords do not match" });
+           return;
+          }auth.handleRegister({
+            name,email,password,phoneNumber
           })}} className="space-y-4">
             {/* Email */}
             <Field

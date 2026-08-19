@@ -24,9 +24,9 @@ const VEHICLE_TYPES = ["Car", "Bike", "Truck", "Van", "SUV"];
 
 const navLinks = [
   { label: "Home", href: "/dashboard" },
+  { label: "Add Vehicle", href: "/add-vehicle" },
   { label: "My Vehicle", href: "/my-vehicle" },
   { label: "Repair", href: "/repair" },
-  { label: "Repair Status", href: "/repair-status" },
   { label: "History", href: "/history" },
 ];
 
@@ -347,7 +347,8 @@ function Footer() {
 /* ─── Main page ─────────────────────────────────────────────────────────── */
 export default function AddVehiclePage() {
   const navigate = useNavigate();
-  const { logoutuser } = useAuth();
+  const { logoutuser,handleAddVehicle,loading:vehicleLoading,errors:vehicleErrors,setErrors: setVehicleErrors } = useAuth();
+  const fieldError = (key: string) => vehicleErrors[key]?.[0];
   const rcRef = useRef<HTMLInputElement>(null);
   const pucRef = useRef<HTMLInputElement>(null);
   const photoRef = useRef<HTMLInputElement>(null);
@@ -365,9 +366,35 @@ export default function AddVehiclePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    await new Promise(r => setTimeout(r, 1600));
-    setSubmitting(false); setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 3000);
+    try {
+      const formData = new FormData()
+      formData.append("vehicleType",form.vehicleType)
+      formData.append("FuelType",form.fuelType)
+      formData.append("brand",form.brand)
+      formData.append("model",form.model)
+      formData.append("year",form.year)
+      formData.append("odometer",form.odometer)
+      formData.append("lastNotedKms",form.lastNotedKilometer)
+      formData.append("RegistrationNumber",form.registrationNumber)
+      formData.append("insuranceExpiryDate", form.insuranceExpiry);
+      formData.append("RCNumber",form.rcNumber) 
+      if(form.rcDocument){
+        formData.append("RCDocument",form.rcDocument)
+      }
+      if(form.pucDocument){
+        formData.append("POCDocument",form.pucDocument)
+      }
+      if(form.vehiclePhoto){
+        formData.append("vehicleImage",form.vehiclePhoto)
+      }
+      await handleAddVehicle(formData)
+      setSubmitted(true)
+      setTimeout(()=> setSubmitted(false),3000)
+    } catch (error) {
+      
+    }finally{
+      setSubmitting(false)
+    }
   };
 
   return (
@@ -456,17 +483,31 @@ export default function AddVehiclePage() {
                   />
                   <div style={{ padding: "0 24px 24px", display: "flex", flexDirection: "column", gap: 14 }}>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
-                      <div><FL>Vehicle Type</FL><GSelect placeholder="e.g Car" value={form.vehicleType} options={VEHICLE_TYPES} onChange={v => set("vehicleType", v)} /></div>
-                      <div><FL>Fuel Type</FL><GInput placeholder="e.g Petrol" value={form.fuelType} onChange={v => set("fuelType", v)} /></div>
-                      <div><FL>Year</FL><GInput placeholder="YYYY" value={form.year} onChange={v => set("year", v)} /></div>
+                      <div><FL>Vehicle Type</FL><GSelect placeholder="e.g Car" value={form.vehicleType} options={VEHICLE_TYPES} onChange={v => set("vehicleType", v)} />
+                        {fieldError("vehicleType") && <p style={{ color: "#f87171", fontSize: 10, marginTop: 5 }}>{fieldError("vehicleType")}</p>}
+                      </div>
+                      <div><FL>Fuel Type</FL><GInput placeholder="e.g Petrol" value={form.fuelType} onChange={v => set("fuelType", v)} />
+                         {fieldError("FuelType") && <p style={{ color: "#f87171", fontSize: 10, marginTop: 5 }}>{fieldError("FuelType")}</p>}
+                      </div>
+                      <div><FL>Year</FL><GInput placeholder="YYYY" value={form.year} onChange={v => set("year", v)} />
+                        {fieldError("year") && <p style={{ color: "#f87171", fontSize: 10, marginTop: 5 }}>{fieldError("year")}</p>}
+                      </div>
                     </div>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-                      <div><FL>Brand</FL><GInput placeholder="e.g BMW, Toyota" value={form.brand} onChange={v => set("brand", v)} /></div>
-                      <div><FL>Model</FL><GInput placeholder="e.g X5, Corolla" value={form.model} onChange={v => set("model", v)} /></div>
+                      <div><FL>Brand</FL><GInput placeholder="e.g BMW, Toyota" value={form.brand} onChange={v => set("brand", v)} />
+                        {fieldError("brand") && <p style={{ color: "#f87171", fontSize: 10, marginTop: 5 }}>{fieldError("brand")}</p>}
+                      </div>
+                      <div><FL>Model</FL><GInput placeholder="e.g X5, Corolla" value={form.model} onChange={v => set("model", v)} />
+                        {fieldError("model") && <p style={{ color: "#f87171", fontSize: 10, marginTop: 5 }}>{fieldError("model")}</p>}
+                      </div>
                     </div>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-                      <div><FL>Odometer (km)</FL><GInput placeholder="Current mileage" value={form.odometer} onChange={v => set("odometer", v)} /></div>
-                      <div><FL>Last Noted Kilometer</FL><GInput placeholder="eg 24000" value={form.lastNotedKilometer} onChange={v => set("lastNotedKilometer", v)} /></div>
+                      <div><FL>Odometer (km)</FL><GInput placeholder="Current mileage" value={form.odometer} onChange={v => set("odometer", v)} />
+                        {fieldError("odometer") && <p style={{ color: "#f87171", fontSize: 10, marginTop: 5 }}>{fieldError("odometer")}</p>}
+                      </div>
+                      <div><FL>Last Noted Kilometer</FL><GInput placeholder="eg 24000" value={form.lastNotedKilometer} onChange={v => set("lastNotedKilometer", v)} />
+                        {fieldError("lastNotedKms") && <p style={{ color: "#f87171", fontSize: 10, marginTop: 5 }}>{fieldError("lastNotedKms")}</p>}
+                      </div>
                     </div>
                   </div>
                 </Card>
@@ -480,9 +521,15 @@ export default function AddVehiclePage() {
                   />
                   <div style={{ padding: "0 24px 24px", display: "flex", flexDirection: "column", gap: 16 }}>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
-                      <div><FL>Registration Number</FL><GInput placeholder="ABC-1234" value={form.registrationNumber} onChange={v => set("registrationNumber", v)} /></div>
-                      <div><FL>Insurance Expiry Date</FL><GInput placeholder="mm/dd/yyyy" value={form.insuranceExpiry} onChange={v => set("insuranceExpiry", v)} /></div>
-                      <div><FL>RC Number</FL><GInput placeholder="Registration Card No." value={form.rcNumber} onChange={v => set("rcNumber", v)} /></div>
+                      <div><FL>Registration Number</FL><GInput placeholder="ABC-1234" value={form.registrationNumber} onChange={v => set("registrationNumber", v)} />
+                        {fieldError("RegistrationNumber") && <p style={{ color: "#f87171", fontSize: 10, marginTop: 5 }}>{fieldError("RegistrationNumber")}</p>}
+                      </div>
+                      <div><FL>Insurance Expiry Date</FL><GInput placeholder="mm/dd/yyyy" value={form.insuranceExpiry} onChange={v => set("insuranceExpiry", v)} />
+                      {fieldError("insuranceExpiryDate") && <p style={{ color: "#f87171", fontSize: 10, marginTop: 5 }}>{fieldError("insuranceExpiryDate")}</p>}
+                      </div>
+                      <div><FL>RC Number</FL><GInput placeholder="Registration Card No." value={form.rcNumber} onChange={v => set("rcNumber", v)} />
+                        {fieldError("RCNumber") && <p style={{ color: "#f87171", fontSize: 10, marginTop: 5 }}>{fieldError("RCNumber")}</p>}
+                      </div>
                     </div>
 
                     <div style={{ borderRadius: 12, border: `1px solid rgba(255,255,255,0.06)`, background: "rgba(255,255,255,0.015)", padding: "16px 18px" }}>
@@ -546,7 +593,7 @@ export default function AddVehiclePage() {
               <Reveal delay={340}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 0 2px" }}>
                   <GoBackBtn onClick={() => navigate(-1)} />
-                  <ConfirmBtn submitting={submitting} done={submitted} />
+                  <ConfirmBtn submitting={submitting || vehicleLoading} done={submitted} />
                 </div>
               </Reveal>
 

@@ -92,7 +92,7 @@ export default function GarageVerificationPage() {
   const [search,       setSearch]       = useState("");
 const {FetchverifyServicecenter,serviceCenters,error} = useAdminAuth()
 const navigate = useNavigate();
- const filtered = serviceCenters.filter((e) => {
+ const filtered =  (serviceCenters ?? []).filter((e) => {
 
   const matchSearch =
     e.name.toLowerCase().includes(
@@ -120,6 +120,8 @@ const navigate = useNavigate();
 useEffect(() => {
   FetchverifyServicecenter();
 }, []);
+console.log("serviceCenters:", serviceCenters); 
+console.log("filtered:", filtered); 
   const handleStatusFilter = (s: StatusFilter) => {
     setStatusFilter(s);
     setDropdownOpen(false);

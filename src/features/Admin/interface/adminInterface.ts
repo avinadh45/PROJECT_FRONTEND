@@ -136,3 +136,32 @@ export interface VerificationDetailsDTO {
     serviceModes: string[];
   }[];
 }
+
+export interface PricingTier {
+  durationMonths: number;
+  price: number;
+}
+
+export interface Subscription {
+  id: string;
+  name: string;
+  features: string[];
+  pricing: PricingTier[];
+  status: "active" | "inactive";
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SubscriptionCreatePayload {
+  name: string;
+  features: string[];
+  pricing: PricingTier[];
+  status?: "active" | "inactive";
+}
+
+export interface SubscriptionUpdatePayload {
+  name?: string;
+  features?: string[];
+  pricing?: PricingTier[];
+  status?: "active" | "inactive";
+}

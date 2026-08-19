@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import type {
   RegisterDTO,
   VerifyOtpDTO,
@@ -13,25 +13,23 @@ import {
   resendOtp,
   resetPassword,
   googleLogin,
-  logout,
+  getMyVehicle,
+  addVehicle
+  
 } from "../service/AuthService";
+
+import type{ VehicleResponse } from "../interface/vehicleIntraface";
+
+
 import axiosClient from "../../../shared/api/axiosClient";
 import { API_ROUTES } from "../../../shared/api/apiRoutes";
 export function useAuth() {
   const navigate = useNavigate();
-  const location = useLocation();
+  //const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [success, setSuccess] = useState<string | null>(null);
-  // useEffect(() => {
-  //   const token = localStorage.getItem("accessToken");
-
-  //   const publicRoutes = ["/login", "/register", "/verify"];
-
-  //   if (token && publicRoutes.includes(window.location.pathname)) {
-  //     navigate("/dashboard");
-  //   }
-  // }, [navigate, location.pathname]);
+ const [vehicles, setVehicles] = useState<VehicleResponse[]>([]);
 
   const clearMessages = () => {
     setErrors({});
@@ -176,11 +174,43 @@ export function useAuth() {
       setErrors({general:err.response?.data?.message || err.message})
     }
   }
+  const handleAddVehicle = async(formData:FormData)=>{
+    setLoading(true)
+    setErrors({})
+  try {
+    const res = await addVehicle(formData) 
+      return res 
+  } catch (err:any) {
+    if(err.response?.data?.errors){
+      setErrors(err.response.data.errors);
+    }else{
+      setErrors({ general: err.response?.data?.message || err.message });
+    }
+    throw err
+  }finally{
+    setLoading(false)
+  }
+  }
+const fetchVehicle = async()=>{
+  setLoading(true)
+  try {
+    const res = await getMyVehicle();
+    console.log("API response:", res); 
+    setVehicles(res.data)
+  } catch (err:any) {
+    console.log("fetchVehicle error:", err);
+     setErrors({ general: err.response?.data?.message || err.message });
+  }finally{
+    setLoading(false)
+  }
+} 
+
   return {
     errors,
-    setErrors,
     loading,
+    vehicles,
     success,
+    setErrors,
     handleApiError,
     setSuccess,
     handleRegister,
@@ -192,5 +222,7 @@ export function useAuth() {
     handleForgotPassword,
     handleResetPassword,
     googleLoginHandler,
+    handleAddVehicle,
+    fetchVehicle
   };
 }

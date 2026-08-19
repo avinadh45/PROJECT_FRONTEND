@@ -1,7 +1,8 @@
-// src/pages/Dashboard.tsx
 
-import { useState } from "react";
-
+import { useState,useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useServiceCenterAuth } from "../hooks/useServiceCenterAuth";
+import { useSubscriptionStatus } from "../context/SubscriptionStatusContext";
 // ── Stat card ─────────────────────────────────────────────────────────────────
 interface StatCardProps {
   label:     string;
@@ -231,7 +232,13 @@ function ComingSoonOverlay({ label = "Live data coming soon" }: { label?: string
 export default function Dashboard() {
   const [period, setPeriod] = useState<"Today" | "Week" | "Month">("Week");
 
-  // TODO: replace with real API data
+  const { fetchStatus} = useServiceCenterAuth()
+  const {activeSubscription} = useSubscriptionStatus()
+  const navigate = useNavigate()
+
+  useEffect(()=>{
+    fetchStatus()
+  },[fetchStatus])
   const STATS = [
     {
       label: "Total Requests", value: "128", change: "+12% vs last week",
@@ -256,8 +263,93 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="flex-1 overflow-y-auto p-6 lg:p-8" style={{ background: "#060a14" }}>
+    <div>
+       <div className="flex-1 overflow-y-auto p-6 lg:p-8" style={{ background: "#060a14" }}>
+      {!activeSubscription && (
+  <div
+    className="relative overflow-hidden flex items-center justify-between gap-6 rounded-2xl mb-7"
+    style={{
+      padding: "20px 28px",
+      background: "linear-gradient(145deg, rgba(14,20,40,0.95), rgba(10,15,30,0.98))",
+      border: "1px solid rgba(6,182,212,0.25)",
+      boxShadow: "0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04)",
+    }}
+  >
+    {/* Ambient glow accent */}
+    <div
+      style={{
+        position: "absolute",
+        top: "-60%",
+        left: "-5%",
+        width: "260px",
+        height: "260px",
+        background: "radial-gradient(circle, rgba(6,182,212,0.15), transparent 70%)",
+        pointerEvents: "none",
+      }}
+    />
 
+    <div className="flex items-center gap-4 relative">
+      <div
+        className="flex-shrink-0 flex items-center justify-center rounded-xl"
+        style={{
+          width: "44px",
+          height: "44px",
+          background: "rgba(6,182,212,0.1)",
+          border: "1px solid rgba(6,182,212,0.3)",
+          color: "#22d3ee",
+        }}
+      >
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 2l8 3.5v5.4c0 5-3.4 8.6-8 10.1-4.6-1.5-8-5.1-8-10.1V5.5L12 2z" />
+          <path d="M9 12l2 2 4-4" />
+        </svg>
+      </div>
+
+      <div>
+        <p
+          className="text-white font-bold"
+          style={{ fontSize: "15px", fontFamily: "'Syne', sans-serif", letterSpacing: "-0.01em" }}
+        >
+          You're verified — go live on Motocline
+        </p>
+        <p
+          style={{
+            fontSize: "13px",
+            color: "rgba(255,255,255,0.45)",
+            fontFamily: "'DM Sans', sans-serif",
+            marginTop: "3px",
+          }}
+        >
+          Subscribe to a plan to appear in search results and start receiving bookings.
+        </p>
+      </div>
+    </div>
+
+    <button
+      onClick={() => navigate("/service-center/subscription")}
+      className="flex-shrink-0 flex items-center gap-2 rounded-xl font-semibold transition-transform relative"
+      style={{
+        padding: "11px 20px",
+        fontSize: "13.5px",
+        color: "#fff",
+        background: "linear-gradient(135deg,#3b82f6,#06b6d4)",
+        border: "none",
+        cursor: "pointer",
+        fontFamily: "'DM Sans', sans-serif",
+        boxShadow: "0 4px 16px rgba(6,182,212,0.25)",
+      }}
+      onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.transform = "translateY(-1px)")}
+      onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)")}
+    >
+      Subscribe Now
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M5 12h14M13 6l6 6-6 6" />
+      </svg>
+    </button>
+  </div>
+)}
+   
+      
       {/* ── Stat cards — blurred (dummy) ───────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-7">
         {STATS.map((s, i) => (
@@ -268,7 +360,6 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* ── Chart + Quick stats — blurred (dummy) ─────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-7">
 
         {/* Chart */}
@@ -347,8 +438,6 @@ export default function Dashboard() {
           ))}
         </div>
       </div>
-
-      {/* ── Recent Bookings — blurred (dummy) ──────────────────── */}
       <div
         className="rounded-2xl overflow-hidden"
         style={{
@@ -428,11 +517,9 @@ export default function Dashboard() {
             </tbody>
           </table>
         </div>
-
-        {/* Blur overlay over entire bookings table */}
         <ComingSoonOverlay label="Connect bookings API" />
       </div>
-
+        </div>
     </div>
   );
 }

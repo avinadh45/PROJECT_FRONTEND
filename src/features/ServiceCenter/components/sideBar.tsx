@@ -1,9 +1,8 @@
-// src/components/Sidebar.tsx
-// Fully reusable sidebar — pass activePage + onNavigate as props
 
-//import { PageKey } from "../types";
 
+// import { useEffect } from "react";
 import { useServiceCenterAuth } from "../hooks/useServiceCenterAuth";
+import { useSubscriptionStatus } from "../context/SubscriptionStatusContext";
 import type { PageKey } from "../types/index";
 import { useNavigate } from "react-router-dom";
 
@@ -20,6 +19,14 @@ const DashboardIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
     <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+  </svg>
+);
+// Credit-card icon — used for the Subscription nav item (kept distinct from EarningsIcon's $ mark)
+const SubscriptionIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="5" width="20" height="14" rx="2.2"/>
+    <path d="M2 10h20"/>
+    <path d="M6 15h4"/>
   </svg>
 );
 const BookingsIcon = () => (
@@ -79,33 +86,40 @@ const LogoutIcon = () => (
 );
 
 // ── Nav items config ──────────────────────────────────────────────────────────
+// Subscription sits right after Dashboard and before Bookings.
 const NAV_ITEMS: NavItem[] = [
-  { key: "dashboard", label: "Dashboard",      icon: <DashboardIcon /> },
-  { key: "bookings",  label: "Bookings",        icon: <BookingsIcon /> },
-  { key: "slot",      label: "Slot",            icon: <SlotIcon /> },
-  { key: "concern",   label: "Concern Request", icon: <ConcernIcon /> },
-  { key: "garage",    label: "Garage",          icon: <GarageIcon /> },
-  { key: "mechanic",  label: "Mechanic",        icon: <MechanicIcon /> },
-  { key: "service",   label: "Service",         icon: <ServiceIcon /> },
-  { key: "earnings",  label: "Earnings",        icon: <EarningsIcon /> },
+  { key: "dashboard",     label: "Dashboard",      icon: <DashboardIcon /> },
+  { key: "subscription",  label: "Subscription",   icon: <SubscriptionIcon /> },
+  { key: "bookings",      label: "Bookings",       icon: <BookingsIcon /> },
+  { key: "slot",          label: "Slot",           icon: <SlotIcon /> },
+  { key: "concern",       label: "Concern Request",icon: <ConcernIcon /> },
+  { key: "garage",        label: "Garage",         icon: <GarageIcon /> },
+  { key: "mechanic",      label: "Mechanic",       icon: <MechanicIcon /> },
+  { key: "service",       label: "Service",        icon: <ServiceIcon /> },
+  { key: "earnings",      label: "Earnings",       icon: <EarningsIcon /> },
 ];
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 interface SidebarProps {
   collapsed?: boolean;
   onToggle?: () => void;
+ // hasActiveSubscription?: boolean;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function Sidebar({
 
-  // activePage,
-  // onNavigate,
   collapsed = false,
   onToggle,
+ // hasActiveSubscription = true,
 }: SidebarProps) {
     const navigate = useNavigate();
     const {logoutServiceCenter} = useServiceCenterAuth()
+    const { activeSubscription} = useSubscriptionStatus()
+    // useEffect(()=>{
+    //   fetchStatus()
+    // },[fetchStatus])
+    const hasActiveSubscription = !!activeSubscription;
   return (
     <aside
       className="flex flex-col h-screen sticky top-0 transition-all duration-300 flex-shrink-0"
@@ -180,13 +194,14 @@ export default function Sidebar({
           {NAV_ITEMS.map(item => {
             // const isActive = activePage === item.key;
             const isActive = false;
+            const needsAction = item.key === "subscription" && !hasActiveSubscription;
             return (
               <li key={item.key}>
                 <button
                  onClick={() => {
   navigate(`/service-center/${item.key}`);
 }}
-                  title={collapsed ? item.label : undefined}
+                  title={collapsed ? (needsAction ? `${item.label} — action needed` : item.label) : undefined}
                   className="w-full flex items-center gap-3 rounded-xl transition-all duration-200 group relative"
                   style={{
                     height: "42px",
@@ -226,16 +241,47 @@ export default function Sidebar({
 
                   {/* Icon */}
                   <span
-                    className="flex-shrink-0 flex items-center justify-center"
+                    className="flex-shrink-0 flex items-center justify-center relative"
                     style={{ marginLeft: collapsed ? "auto" : "8px", marginRight: collapsed ? "auto" : "0" }}
                   >
                     {item.icon}
+                    {/* Collapsed-state indicator: small dot on the icon */}
+                    {needsAction && collapsed && (
+                      <span
+                        className="absolute rounded-full"
+                        style={{
+                          width: "7px", height: "7px",
+                          top: "-3px", right: "-4px",
+                          background: "#f59e0b",
+                          border: "1.5px solid #0a0f1e",
+                        }}
+                      />
+                    )}
                   </span>
 
                   {/* Label */}
                   {!collapsed && (
                     <span className="text-[13.5px] font-medium whitespace-nowrap" style={{ fontFamily: "'DM Sans', sans-serif" }}>
                       {item.label}
+                    </span>
+                  )}
+
+                  {/* Expanded-state indicator: "Action needed" pill */}
+                  {needsAction && !collapsed && (
+                    <span
+                      className="ml-auto flex-shrink-0 rounded-full whitespace-nowrap"
+                      style={{
+                        fontSize: "9.5px",
+                        fontWeight: 700,
+                        letterSpacing: "0.02em",
+                        padding: "3px 7px",
+                        color: "#fbbf24",
+                        background: "rgba(245,158,11,0.12)",
+                        border: "1px solid rgba(245,158,11,0.35)",
+                        fontFamily: "'DM Sans', sans-serif",
+                      }}
+                    >
+                      Action needed
                     </span>
                   )}
 
@@ -250,7 +296,7 @@ export default function Sidebar({
                         fontFamily: "'DM Sans',sans-serif",
                       }}
                     >
-                      {item.label}
+                      {item.label}{needsAction ? " — action needed" : ""}
                     </span>
                   )}
                 </button>

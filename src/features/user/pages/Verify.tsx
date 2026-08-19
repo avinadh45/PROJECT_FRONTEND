@@ -54,14 +54,7 @@ export default function  Verify() {
   const [canResend, setCanResend] = useState(false);
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
 
-  // countdown
-//   useEffect(() => {
-//   const storedTime = localStorage.getItem("otp_sent_time");
 
-//   if (!storedTime) {
-//     localStorage.setItem("otp_sent_time", Date.now().toString());
-//   }
-// }, []);
 
 useEffect(() => {
 

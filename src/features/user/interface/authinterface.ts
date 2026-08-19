@@ -3,7 +3,7 @@ export interface RegisterDTO {
     name:string
     email:string
     password:string
-    confirmPassword:string
+    //confirmPassword:string
     phoneNumber:string
 }
 export interface VerifyOtpDTO{

@@ -1,5 +1,6 @@
 export type PageKey =
   | "dashboard"
+  | "subscription"
   | "bookings"
   | "slot"
   | "concern"
@@ -7,4 +8,3 @@ export type PageKey =
   | "mechanic"
   | "service"
   | "earnings";
- 

@@ -54,3 +54,41 @@ export interface VerificationStatusDTO {
 
    rejectionDetails?: string;
 }
+export interface IServiceOffered {
+  serviceId: {
+    _id: string;
+    name: string;
+    icon: string;
+    advanceFee: number;
+  };
+  advanceFee: number  | null;
+  status: "active" | "inactive";
+  vehicleTypes: string[];
+  serviceModes: string[];
+}
+
+export interface ServiceCatalogResponse {
+  success: boolean;
+  message: string;
+  data: {
+    data: IServiceOffered[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+
+}
+export interface AddServiceDTO {
+  serviceId: string;
+  advanceFee: number | null;
+   vehicleTypes: string[];
+  serviceModes: string[];
+ 
+}
+export interface AvailabilityFormData {
+  workingDays: string[];        
+  workingHours: { start: string; end: string };
+  slotDuration: number;          
+  maxBookingsPerSlot: number;
+}

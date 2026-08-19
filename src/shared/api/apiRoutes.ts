@@ -17,7 +17,15 @@ export const API_ROUTES = {
     RESET_PASSWORD: "/service-center/reset-password",
     BLOCK_MECHANIC: (id: string) => `/service-center/block/${id}`,
     VERIFICATION_STATUS:"/service-center/verification-status",
-    EDIT_VERIFICATION:"/service-center/application"
+    EDIT_VERIFICATION:"/service-center/application",
+    MY_SERVICES:(page:number,limit:number,search:string = "")=> 
+      `/service-center/services?page=${page}&limit=${limit}&search=${search}`,
+    UPDATE_SERVICE_FEE:"/service-center/fee",
+    ADD_SERVICES:"/service-center/add-service",
+    GET_CATEGORIES:"/service-center/categories",
+    TOGGLE_STATUS:(serviceId:string)=> `/service-center/status/${serviceId}`,
+    PROFILE:'/service-center/profile',
+    UPDATE_AVAILABILITY:"/service-center/availability",
     
   },
   MECHANIC: {
@@ -67,5 +75,33 @@ export const API_ROUTES = {
 
     REJECT_SERVICE_CENTER: (id: string) =>
       `/admin/verifyServiceCenter/reject/${id}`,
+    CHECK_CATEGORY_NAME:(name:string)=> `/admin/categorys/check-name?name=${encodeURIComponent(name)}`
   },
+  VEHICLE:{
+    ADD:"/vehicle/add",
+    GET_VEHICLE:"/vehicle/my-vehicle",
+    UPDATE_VEHICLE: (id:string)=> `/vehicle/update/${id}`,
+    GET_VEHICLE_BY_ID:(id:string)=> `/vehicle/${id}`, 
+    DELETE:(id:string)=> `/vehicle/delete/${id}`
+  },
+  SUBSCRIPTION:{
+    ADD_SUBSCRIPTION:"/subscription/add",
+    LIST_SUBSCRIPTION:(page:number,limit:number,search:string="")=>{
+       return  `subscription/list?page=${page}$limit=${limit}&search=${encodeURIComponent(search)}`
+    },
+    UPDATE_SUBSCRIPTION:(id:string)=> `subscription/${id}`,
+    DELETE_SUBSCRIPTION:(id:string)=> `subscription/${id}`,
+    PLANS: (limit: number = 50) => `subscription/plans?limit=${limit}`,
+    STATUS:"/subscription/status",
+    SUBSCRIBE:"/subscription/subscribe",
+    CREATE_ORDER:"/subscription/create-order",
+    VERIFY_PAYMENT:"/subscription/verify-payment"
+  },
+  SLOT:{
+   GET_SLOT: (serviceCenterId: string, date: string) => `/slot/${serviceCenterId}/slots?date=${date}`,
+   BLOCK_SLOT:'/slot/block',
+   UNBLOCK_SLOT:"/slot/unblock",
+   BLOCK_FULL_DAY:"/slot/block-day",
+   UNBLOCK_FULL_DAY:"/slot/unblock-day"
+  }
 };

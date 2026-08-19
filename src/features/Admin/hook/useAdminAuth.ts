@@ -32,7 +32,7 @@ import axiosClient from "../../../shared/api/axiosClient";
 export const useAdminAuth = () => {
   const [users, Setuser] = useState<UserListDTO[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
-  const [serviceCenters, setServiceCenters] = useState<ServiceCenterListDTO[]>([],);
+  const [serviceCenters, setServiceCenters] = useState<ServiceCenterListDTO[]>([]);
   const [selectedServiceCenter, SetSelectedServiceCenter] =
     useState<ServiceCenterDetailsDTO | null>(null);
   const [selectedUser, SetselectedUser] = useState<UserDetailsDTO | null>(null);
@@ -208,7 +208,7 @@ const navigate = useNavigate()
      
       const response = await verifyServiceCenter()
        console.log(response);
-      setServiceCenters(response.serviceCenter)
+      setServiceCenters(response)
     } catch (error:any) {
       setError(error.response?.data?.message || error.message)
     }finally{
