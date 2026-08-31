@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import MapPicker from "../components/MapPicker";
+import MapPicker from "../../../shared/components/MapPicker";
 
 import { useServiceCenterAuth } from "../hooks/useServiceCenterAuth";
 import { getAllCategory } from "../../Admin/service/adminService";
@@ -164,16 +164,22 @@ formData.append(
   })
 );
 
+const resolvedServiceModes: string[] =
+  form.serviceMode === "both"
+    ? ["drive-in", "pickup-drop"]
+    : [form.serviceMode];
+
 formData.append(
   "servicesOffered",
   JSON.stringify(
     form.services.map((id) => ({
       serviceId: id,
       vehicleTypes: form.vehicleTypes,
-      serviceModes: [form.serviceMode],
+      serviceModes: resolvedServiceModes,
     }))
   )
 );
+
 if (form.garageLicense) {
   formData.append(
     "garageLicense",

@@ -7,6 +7,7 @@ import AdminProtectedRoute from './AdminProtectedRoute.tsx';
 import ServiceCenterLayout from "../features/ServiceCenter/layouts/ServiceCenterLayout.tsx";
 import AdminLayout from '../features/Admin/layout/adminLayout.tsx';
 import PageLoader from '../features/user/components/PageLoader.tsx'; 
+//import Booking from '../features/user/pages/Booking.tsx'
 
 // ── User ──────────────────────────────────────────────
 const Landingpage = lazy(() => import('../features/user/pages/Landingpage.tsx'));
@@ -20,6 +21,8 @@ const AddVehiclePage = lazy(() => import('../features/user/pages/AddVehicle.tsx'
 const VehicleList = lazy(() => import('../features/user/pages/VehicleList.tsx'));
 const EditVehiclePage = lazy(() => import('../features/user/pages/EditVehicle.tsx'));
 const VehicleDetailPage = lazy(()=> import('../features/user/pages/VehicleDetails.tsx'))
+const Booking = lazy(()=> import('../features/user/pages/Booking.tsx'))
+const BookingConfirmation = lazy(()=> import ("../features/user/pages/BookingConfirmation.tsx"))
 // ── Service Center ────────────────────────────────────
 const ServiceCenterLogin = lazy(() => import("../features/ServiceCenter/pages/login.tsx"));
 const ServiceCenterRegister = lazy(() => import("../features/ServiceCenter/pages/register.tsx"));
@@ -31,7 +34,8 @@ const VerificationStatusPage = lazy(() => import('../features/ServiceCenter/page
 const EditRegister = lazy(() => import("../features/ServiceCenter/pages/Edite-register.tsx"));
 const Service = lazy(()=> import("../features/ServiceCenter/pages/Services.tsx") )
 const SubscriptionPage = lazy(()=> import("../features/ServiceCenter/pages/SubscriptionPage.tsx"))
-const Slot = lazy(()=> import('../features/ServiceCenter/pages/slot.tsx'))
+const Slot = lazy(()=> import('../features/ServiceCenter/pages/Slot.tsx'))
+
 
 // ── Mechanic ──────────────────────────────────────────
 const MechanicLogin = lazy(() => import('../features/Mechanic/pages/login.tsx'));
@@ -63,6 +67,8 @@ function AppRoutes() {
         <Route path='/my-vehicle' element={<UserProtectedRoute><VehicleList /></UserProtectedRoute>} />
          <Route path='/my-vehicle/:id' element={<UserProtectedRoute><VehicleDetailPage /></UserProtectedRoute>} />
         <Route path='/vehicle/update/:id' element={<UserProtectedRoute><EditVehiclePage /></UserProtectedRoute>} />
+        <Route path='/booking' element={<UserProtectedRoute><Booking /></UserProtectedRoute>} />
+        <Route path = "/booking-confirmed/:bookingId" element={<UserProtectedRoute><BookingConfirmation/></UserProtectedRoute>}/>
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/service-center/login" element={<ServiceCenterLogin />} />

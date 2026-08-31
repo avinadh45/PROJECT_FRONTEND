@@ -42,3 +42,10 @@ export interface VehicleListApiResponse {
   message: string;
   data: VehicleResponse[];  
 }
+export interface Vehicle {
+  id: string;
+  name: string;
+  plateNumber: string;
+  imageUrl: string;
+  type: string;
+}

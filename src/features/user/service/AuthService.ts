@@ -7,6 +7,7 @@ import type {
 } from "../interface/authinterface";
 import type{ VehicleApiResponse,VehicleListApiResponse } from "../interface/vehicleIntraface";
 import { API_ROUTES } from "../../../shared/api/apiRoutes";
+import type { BookingConfirmation, BookingOrderPayload, BookingOrderResult, GarageFilter, VerifyPaymentPayload } from "../interface/bookingInterface";
 
 export const Register = async (data: RegisterDTO): Promise<AuthResponse> => {
   const {...user} = data
@@ -82,4 +83,39 @@ export const getVehicleById = async(id:string):Promise<VehicleApiResponse>=>{
 
 export const deleteVehicle_API = async(id:string):Promise<void>=>{
   return await axiosClient.delete(API_ROUTES.VEHICLE.DELETE(id))
+}
+
+export const fetchGarages = async(filter:GarageFilter)=>{
+
+  const res = await axiosClient.get(API_ROUTES.BOOKING.GARAGES,{params:filter})
+  return res.data.data
+}
+
+export const fetchCategories  = async()=>{
+
+  const res = await axiosClient.get(API_ROUTES.BOOKING.CATEGORIES,{params: { page: 1, limit: 50, status: "active" }})
+  return res.data.data
+}
+
+
+export const fetchSlot  = async(serviceCenterId:string,date:string)=>{
+
+  const res = await axiosClient.get(API_ROUTES.BOOKING.GET_SLOTS(serviceCenterId,date))
+  return res.data.data
+}
+
+export const createBooking = async(payload:BookingOrderPayload):Promise<BookingOrderResult>=>{
+  const res = await axiosClient.post(API_ROUTES.BOOKING.CREATE_ORDER,payload)
+  return res.data.data 
+}
+
+export const verifyBookingPayment = async(payload:VerifyPaymentPayload):Promise<BookingConfirmation>=>{
+  const res = await axiosClient.post(API_ROUTES.BOOKING.VERIFY_PAYMENT,payload)
+  return res.data.data
+}
+
+export const fetchBookingById  = async(bookingId:string): Promise<BookingConfirmation>=>{
+
+  const res = await axiosClient.get(API_ROUTES.BOOKING.GET_BY_ID(bookingId))
+  return res.data.data 
 }

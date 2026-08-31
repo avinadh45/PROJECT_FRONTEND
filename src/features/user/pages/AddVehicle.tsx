@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "../components/Navbar";
 import { useAuth } from "../hooks/useAuth";
+import { VEHICLE_TYPES } from "../../../constants/vehicleTypes";
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
 interface VehicleFormData {
@@ -20,13 +21,12 @@ interface VehicleFormData {
   vehiclePhoto: File | null;
 }
 
-const VEHICLE_TYPES = ["Car", "Bike", "Truck", "Van", "SUV"];
 
 const navLinks = [
   { label: "Home", href: "/dashboard" },
   { label: "Add Vehicle", href: "/add-vehicle" },
   { label: "My Vehicle", href: "/my-vehicle" },
-  { label: "Repair", href: "/repair" },
+  { label: "Repair", href: "/booking" },
   { label: "History", href: "/history" },
 ];
 
@@ -90,7 +90,7 @@ function GInput({ placeholder, value, onChange }: { placeholder: string; value: 
     </div>
   );
 }
-function GSelect({ placeholder, value, options, onChange }: { placeholder: string; value: string; options: string[]; onChange: (v: string) => void }) {
+function GSelect({ placeholder, value, options, onChange }: { placeholder: string; value: string; options:readonly string[]; onChange: (v: string) => void }) {
   const [focused, setFocused] = useState(false);
   return (
     <div style={{

@@ -103,5 +103,13 @@ export const API_ROUTES = {
    UNBLOCK_SLOT:"/slot/unblock",
    BLOCK_FULL_DAY:"/slot/block-day",
    UNBLOCK_FULL_DAY:"/slot/unblock-day"
+  },
+  BOOKING:{
+    GARAGES:'/booking/garages',
+    CATEGORIES:"/booking/categories",
+    GET_SLOTS: (serviceCenterId: string, date: string) => `/booking/${serviceCenterId}/slots?date=${date}`,
+    CREATE_ORDER:"/booking/create-order",
+    VERIFY_PAYMENT:"/booking/verify-payment",
+    GET_BY_ID:(bookingId:string)=> `/booking/${bookingId}`
   }
 };
