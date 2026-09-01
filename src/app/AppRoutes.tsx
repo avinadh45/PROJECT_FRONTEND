@@ -23,6 +23,7 @@ const EditVehiclePage = lazy(() => import('../features/user/pages/EditVehicle.ts
 const VehicleDetailPage = lazy(()=> import('../features/user/pages/VehicleDetails.tsx'))
 const Booking = lazy(()=> import('../features/user/pages/Booking.tsx'))
 const BookingConfirmation = lazy(()=> import ("../features/user/pages/BookingConfirmation.tsx"))
+
 // ── Service Center ────────────────────────────────────
 const ServiceCenterLogin = lazy(() => import("../features/ServiceCenter/pages/login.tsx"));
 const ServiceCenterRegister = lazy(() => import("../features/ServiceCenter/pages/register.tsx"));
@@ -35,6 +36,7 @@ const EditRegister = lazy(() => import("../features/ServiceCenter/pages/Edite-re
 const Service = lazy(()=> import("../features/ServiceCenter/pages/Services.tsx") )
 const SubscriptionPage = lazy(()=> import("../features/ServiceCenter/pages/SubscriptionPage.tsx"))
 const Slot = lazy(()=> import('../features/ServiceCenter/pages/Slot.tsx'))
+const Bookings = lazy(()=> import("../features/ServiceCenter/pages/Booking.tsx"))
 
 
 // ── Mechanic ──────────────────────────────────────────
@@ -80,9 +82,11 @@ function AppRoutes() {
         <Route path="/service-center" element={<ServiceCenterProtectedRoute><ServiceCenterLayout /></ServiceCenterProtectedRoute>}>
           <Route path="dashboard" element={<ServiceCenterDashboard />} />
           <Route path="mechanic" element={<ServiceCenterMechanic />} />
+          <Route path='bookings' element={<Bookings/>}/>
           <Route path='service' element={<Service/>}/>
           <Route path='subscription' element={<SubscriptionPage/>}/>
           <Route path='slot' element={<Slot/>}/>
+
         </Route>
         <Route path="/mechanic/login" element={<MechanicLogin />} />
         <Route path="/mechanic/dashboard" element={<MechanicProtectedRoute><MechanicBashboard /></MechanicProtectedRoute>} />

@@ -8,7 +8,8 @@ import type {
   ServiceCenterLoginDTO,
 } from "../interface/serviceCenter";
 import type { Subscription } from "../types/subscription";
-import type { AvailabilityFormDat } from "../types/slot";
+import type { PaginatedBookings } from "../interface/bookingInterface";
+// import type { AvailabilityFormDat } from "../types/slot";
 
 export const registerServicCenter = async (
   data: FormData,
@@ -125,4 +126,10 @@ export const Getsubscription = async ()=>{
 
     const res = await axiosClient.patch(API_ROUTES.SERVICE_CENTER.UPDATE_AVAILABILITY,dto)
     return res.data.data
+  }
+
+  export const fetchBooking = async(page:number,limit:number,status?:string,seaarch?:string):Promise<PaginatedBookings>=>{
+
+    const res = await axiosClient.get(API_ROUTES.SERVICE_CENTER.LIST(page,limit,status,seaarch))
+    return res.data.data  
   }

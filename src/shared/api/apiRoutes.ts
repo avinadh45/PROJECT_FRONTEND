@@ -26,6 +26,12 @@ export const API_ROUTES = {
     TOGGLE_STATUS:(serviceId:string)=> `/service-center/status/${serviceId}`,
     PROFILE:'/service-center/profile',
     UPDATE_AVAILABILITY:"/service-center/availability",
+    LIST:(page:number,limit:number,status?:string,search?:string)=>{
+      const params = new URLSearchParams({page:String(page),limit:String(limit)});
+      if(status) params.set("status",status)
+      if(search) params.set("search",search) 
+        return `/service-center/bookings?${params.toString()}`
+    }
     
   },
   MECHANIC: {
@@ -110,6 +116,7 @@ export const API_ROUTES = {
     GET_SLOTS: (serviceCenterId: string, date: string) => `/booking/${serviceCenterId}/slots?date=${date}`,
     CREATE_ORDER:"/booking/create-order",
     VERIFY_PAYMENT:"/booking/verify-payment",
-    GET_BY_ID:(bookingId:string)=> `/booking/${bookingId}`
+    GET_BY_ID:(bookingId:string)=> `/booking/${bookingId}`,
+    
   }
 };

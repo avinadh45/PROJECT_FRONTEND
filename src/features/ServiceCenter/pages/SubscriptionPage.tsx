@@ -152,9 +152,7 @@ function FeatureList({ features }: { features: string[] }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Plan card (with per-plan tier selection)
-// ─────────────────────────────────────────────────────────────────────────────
+
 
 function PlanCard({
   plan,
