@@ -16,6 +16,7 @@ import {
   ChevronRight,
   type LucideIcon,
 } from "lucide-react";
+import { useServiceCenterBookings } from "../hooks/useServiceCenterBookings";
 
 /* ------------------------------------------------------------------ */
 /* Types                                                               */
@@ -30,7 +31,7 @@ type BookingStatus =
   | "cancelled"
   | "failed_slot_unavailable";
 
-type PaymentStatus = "paid" | "pending";
+type PaymentStatus = "paid" | "pending" | "failed";
 type VisitType = "drive-in" | "pickup-drop";
 
 interface AdvancePayment {
@@ -40,19 +41,17 @@ interface AdvancePayment {
 
 interface Booking {
   id: string;
-  vehicle: {
-    registrationNumber: string;
-    ownerName: string;
-    type?: string;
-  };
-  service: {
-    category: string;
-  };
+  vehicleRegistrationNumber: string;
+  customerName: string;
+  categoryName: string;
   visitType: VisitType;
-  scheduledAt: string; 
-  mechanicAssigned: boolean;
-  mechanicName?: string;
-  advancePayment: AdvancePayment;
+  schedule: {
+    date: string;
+    slotStartingTime: string;
+    slotEndingTime: string;
+  };
+  mechanicName: string | null;
+  advancePaymentStatus: PaymentStatus;
   status: BookingStatus;
 }
 
@@ -179,6 +178,10 @@ const PAYMENT_CONFIG: Record<PaymentStatus, { label: string; className: string }
     label: "Pending",
     className: "bg-amber-400/10 text-amber-300 border-amber-400/20",
   },
+  failed: {
+    label: "Failed",
+    className: "bg-red-400/10 text-red-300 border-red-400/20",
+  },
 };
 
 const TABLE_COLUMNS = [
@@ -196,52 +199,33 @@ const TABLE_COLUMNS = [
 /* Helpers                                                              */
 /* ------------------------------------------------------------------ */
 
-function formatDateTime(iso: string) {
-  const d = new Date(iso);
-  const date = d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
-  const time = d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
-  return { date, time };
+function formatDateTime(date: string, time: string) {
+  const d = new Date(date);
+  const formattedDate = d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+  return { date: formattedDate, time };
 }
 
-function isWithinRange(iso: string, range: DateRangeFilter) {
-  if (!range) return true;
-  const now = new Date();
-  const d = new Date(iso);
-  if (range === "today") {
-    return d.toDateString() === now.toDateString();
-  }
-  if (range === "week") {
-    const weekMs = 7 * 24 * 60 * 60 * 1000;
-    return d >= now && d.getTime() - now.getTime() <= weekMs;
-  }
-  if (range === "month") {
-    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
-  }
-  return true;
-}
 
-function matchesStatusFilter(booking: Booking, status: StatusFilter) {
-  if (status === "all") return true;
-  if (status === "pending_payment") return booking.status === "pending_payment";
-  return booking.status === status;
-}
 
-function deriveBookingStats(bookings: Booking[]): BookingStats {
-  return {
-    total: bookings.length,
-    awaitingStart: bookings.filter((b) => b.status === "confirmed" || b.status === "assigned")
-      .length,
-    ongoing: bookings.filter((b) => b.status === "in-progress").length,
-    completed: bookings.filter((b) => b.status === "completed").length,
-    cancelled: bookings.filter(
-      (b) => b.status === "cancelled" || b.status === "failed_slot_unavailable"
-    ).length,
-  };
-}
+
+
+// function deriveBookingStats(bookings: Booking[]): BookingStats {
+//   return {
+//     total: bookings.length,
+//     awaitingStart: bookings.filter((b) => b.status === "confirmed" || b.status === "assigned")
+//       .length,
+//     ongoing: bookings.filter((b) => b.status === "in-progress").length,
+//     completed: bookings.filter((b) => b.status === "completed").length,
+//     cancelled: bookings.filter(
+//       (b) => b.status === "cancelled" || b.status === "failed_slot_unavailable"
+//     ).length,
+//   };
+// }
 
 /* ------------------------------------------------------------------ */
 /* Small presentational pieces                                         */
 /* ------------------------------------------------------------------ */
+
 
 function StatusBadge({ status }: { status: BookingStatus }) {
   const cfg = STATUS_CONFIG[status];
@@ -517,16 +501,16 @@ function BookingRow({
   booking: Booking;
   onView: (bookingId: string) => void;
 }) {
-  const { date, time } = formatDateTime(booking.scheduledAt);
+  const { date, time } = formatDateTime(booking.schedule.date, booking.schedule.slotStartingTime);
   const dimmed = booking.status === "cancelled" || booking.status === "failed_slot_unavailable";
 
   return (
     <tr className={`transition-colors hover:bg-white/[0.02] ${dimmed ? "opacity-45" : ""}`}>
       <td className="whitespace-nowrap px-4 py-3.5">
-        <p className="font-semibold text-white">{booking.vehicle.registrationNumber}</p>
-        <p className="text-xs text-slate-500">{booking.vehicle.ownerName}</p>
+        <p className="font-semibold text-white">{booking.vehicleRegistrationNumber}</p>
+        <p className="text-xs text-slate-500">{booking.customerName}</p>
       </td>
-      <td className="whitespace-nowrap px-4 py-3.5 text-slate-300">{booking.service.category}</td>
+      <td className="whitespace-nowrap px-4 py-3.5 text-slate-300">{booking.categoryName}</td>
       <td className="whitespace-nowrap px-4 py-3.5">
         <span className="inline-flex items-center gap-1.5 text-slate-300">
           {booking.visitType === "drive-in" ? (
@@ -542,14 +526,14 @@ function BookingRow({
         <p className="text-xs text-slate-500">{time}</p>
       </td>
       <td className="whitespace-nowrap px-4 py-3.5">
-        {booking.mechanicAssigned ? (
+        {booking.mechanicName ? (
           <span className="text-slate-300">{booking.mechanicName}</span>
         ) : (
           <span className="text-slate-500">Unassigned</span>
         )}
       </td>
       <td className="whitespace-nowrap px-4 py-3.5">
-        <PaymentBadge status={booking.advancePayment.status} />
+        <PaymentBadge status={booking.advancePaymentStatus} />
       </td>
       <td className="whitespace-nowrap px-4 py-3.5">
         <StatusBadge status={booking.status} />
@@ -667,180 +651,60 @@ function BookingsPagination({ page, pageSize, total, onPageChange }: BookingsPag
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* Mock data — replace with the real bookings API call                 */
-/* ------------------------------------------------------------------ */
 
-async function fetchBookings(): Promise<Booking[]> {
-  await new Promise((r) => setTimeout(r, 600));
-  const now = Date.now();
-  const day = 24 * 60 * 60 * 1000;
 
-  return [
-    {
-      id: "1",
-      vehicle: { registrationNumber: "KL-07-AB-2345", ownerName: "Arjun Nair", type: "Sedan" },
-      service: { category: "General Service" },
-      visitType: "drive-in",
-      scheduledAt: new Date(now + day).toISOString(),
-      mechanicAssigned: true,
-      mechanicName: "Rahul K.",
-      advancePayment: { status: "paid" },
-      status: "confirmed",
-    },
-    {
-      id: "2",
-      vehicle: { registrationNumber: "KL-09-CD-7788", ownerName: "Meera Menon", type: "Hatchback" },
-      service: { category: "Brake Inspection" },
-      visitType: "pickup-drop",
-      scheduledAt: new Date(now + 2 * day).toISOString(),
-      mechanicAssigned: false,
-      advancePayment: { status: "pending" },
-      status: "pending_payment",
-    },
-    {
-      id: "3",
-      vehicle: { registrationNumber: "KL-11-EF-1122", ownerName: "Sanjay Pillai", type: "SUV" },
-      service: { category: "AC Repair" },
-      visitType: "drive-in",
-      scheduledAt: new Date(now).toISOString(),
-      mechanicAssigned: true,
-      mechanicName: "Vishnu S.",
-      advancePayment: { status: "paid" },
-      status: "in-progress",
-    },
-    {
-      id: "4",
-      vehicle: { registrationNumber: "KL-05-GH-4433", ownerName: "Divya Krishnan", type: "Sedan" },
-      service: { category: "Full Body Wash" },
-      visitType: "drive-in",
-      scheduledAt: new Date(now - 3 * day).toISOString(),
-      mechanicAssigned: true,
-      mechanicName: "Rahul K.",
-      advancePayment: { status: "paid" },
-      status: "completed",
-    },
-    {
-      id: "5",
-      vehicle: { registrationNumber: "KL-14-IJ-9900", ownerName: "Fahad Rasheed", type: "2-Wheeler" },
-      service: { category: "Engine Diagnostics" },
-      visitType: "pickup-drop",
-      scheduledAt: new Date(now - day).toISOString(),
-      mechanicAssigned: false,
-      advancePayment: { status: "paid" },
-      status: "cancelled",
-    },
-    {
-      id: "6",
-      vehicle: { registrationNumber: "KL-03-KL-5566", ownerName: "Anjali Suresh", type: "Hatchback" },
-      service: { category: "Tyre Replacement" },
-      visitType: "drive-in",
-      scheduledAt: new Date(now + 3 * day).toISOString(),
-      mechanicAssigned: true,
-      mechanicName: "Nithin P.",
-      advancePayment: { status: "paid" },
-      status: "assigned",
-    },
-    {
-      id: "7",
-      vehicle: { registrationNumber: "KL-02-MN-3311", ownerName: "Rohit Varma", type: "Commercial" },
-      service: { category: "Slot Rescheduled" },
-      visitType: "pickup-drop",
-      scheduledAt: new Date(now - 2 * day).toISOString(),
-      mechanicAssigned: false,
-      advancePayment: { status: "pending" },
-      status: "failed_slot_unavailable",
-    },
-  ];
-}
-
-/* ------------------------------------------------------------------ */
-/* Page                                                                 */
-/* ------------------------------------------------------------------ */
 
 export default function BookingsListPage() {
   const navigate = useNavigate();
 
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [filters, setFilters] = useState<BookingFilters>(DEFAULT_FILTERS);
   const [page, setPage] = useState(1);
+  const { data, isLoading } = useServiceCenterBookings(
+    page,
+    PAGE_SIZE,
+    filters.status === "all" ? undefined : filters.status,
+    filters.search
+  );
+  const bookings = (data?.data ?? []) as unknown as Booking[];
+  const total = data?.total ?? 0;
 
-  useEffect(() => {
-    let cancelled = false;
-    setIsLoading(true);
+  const stats: BookingStats = { total: 0, awaitingStart: 0, ongoing: 0, completed: 0, cancelled: 0 };
 
-    // Replace with the real bookings API call, e.g.:
-    // const res = await api.get<Booking[]>("/service-center/bookings");
-    fetchBookings()
-      .then((data) => {
-        if (!cancelled) setBookings(data);
-      })
-      .finally(() => {
-        if (!cancelled) setIsLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const filteredBookings = useMemo(() => {
-    const q = filters.search.trim().toLowerCase();
-    return bookings.filter((b) => {
-      if (q) {
-        const haystack = `${b.vehicle.registrationNumber} ${b.vehicle.ownerName} ${b.service.category}`.toLowerCase();
-        if (!haystack.includes(q)) return false;
-      }
-      if (!matchesStatusFilter(b, filters.status)) return false;
-      if (!isWithinRange(b.scheduledAt, filters.dateRange)) return false;
-      if (filters.vehicleType && b.vehicle.type !== filters.vehicleType) return false;
-      if (filters.visitType && b.visitType !== filters.visitType) return false;
-      return true;
-    });
-  }, [bookings, filters]);
-
-  const paginatedBookings = useMemo(() => {
-    const start = (page - 1) * PAGE_SIZE;
-    return filteredBookings.slice(start, start + PAGE_SIZE);
-  }, [filteredBookings, page]);
-
-  const stats = useMemo(() => deriveBookingStats(bookings), [bookings]);
 
   function handleFiltersChange(next: BookingFilters) {
     setFilters(next);
     setPage(1);
   }
 
-  return (
-    <div className="min-h-screen bg-[#060a14] px-6 py-8">
-      <header className="mb-6">
-        <h1 className="font-['Syne'] text-2xl font-bold text-white">Bookings</h1>
-        <p className="mt-1 font-['DM_Sans'] text-sm text-slate-400">
-          Manage all repair bookings and scheduled maintenance.
-        </p>
-      </header>
+ return (
+  <div className="min-h-screen bg-[#060a14] px-6 py-8">
+    <header className="mb-6">
+      <h1 className="font-['Syne'] text-2xl font-bold text-white">Bookings</h1>
+      <p className="mt-1 font-['DM_Sans'] text-sm text-slate-400">
+        Manage all repair bookings and scheduled maintenance.
+      </p>
+    </header>
 
-      <div className="space-y-6">
-        <BookingStatsRow stats={stats} />
+    <div className="space-y-6">
+      <BookingStatsRow stats={stats} />
 
-        <BookingFiltersBar filters={filters} onChange={handleFiltersChange} />
+      <BookingFiltersBar filters={filters} onChange={handleFiltersChange} />
 
-        <BookingsTable
-          bookings={paginatedBookings}
-          isLoading={isLoading}
-          onView={(id) => navigate(`/bookings/${id}`)}
+      <BookingsTable
+        bookings={bookings}
+        isLoading={isLoading}
+        onView={(id) => navigate(`/bookings/${id}`)}
+      />
+
+      {!isLoading && bookings.length > 0 && (
+        <BookingsPagination
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
         />
-
-        {!isLoading && filteredBookings.length > 0 && (
-          <BookingsPagination
-            page={page}
-            pageSize={PAGE_SIZE}
-            total={filteredBookings.length}
-            onPageChange={setPage}
-          />
-        )}
-      </div>
+      )}
     </div>
-  );
+  </div>
+);
 }

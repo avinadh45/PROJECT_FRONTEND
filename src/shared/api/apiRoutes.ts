@@ -39,6 +39,12 @@ export const API_ROUTES = {
     CREATE: "/mechanic/create",
     LIST: (page: number, limit: number,search:string = "") =>
       `/mechanic/list?page=${page}&limit=${limit}&search=${search}`,
+    BOOKINGS:(page:Number,limit:number,status?:string,search?:string)=>{
+      const params = new URLSearchParams({page:String(page),limit:String(limit)})
+      if(status) params.set("status",status)
+      if(search) params.set("search",search)
+        return `/mechanic/bookings?${params.toString()}`
+    }
   },
   ADMIN: {
     LOGIN: "/admin/login",

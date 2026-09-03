@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useMechanicBookings } from "../hooks/useMechanicBookings";
 
 
 /* ─── Types ─────────────────────────────────────────────────── */
@@ -39,6 +40,42 @@ const STATUS_CONFIG: Record<Status, { color: string; bg: string; dot: string; gl
   Pending:   { color: "#fbbf24", bg: "rgba(251,191,36,0.1)",  dot: "#fbbf24", glow: "rgba(251,191,36,0.3)" },
 };
 
+/* Map real backend status strings -> this page's display status */
+function mapStatus(raw: string): Status {
+  switch (raw) {
+    case "completed":
+      return "Completed";
+    case "in-progress":
+    case "assigned":
+      return "Ongoing";
+    case "cancelled":
+    case "failed_slot_unavailable":
+      return "Cancelled";
+    case "pending_payment":
+    case "confirmed":
+    default:
+      return "Pending";
+  }
+}
+
+function mapToDisplayBooking(raw: any): Booking {
+  return {
+    id: raw.id,
+    vehicle: raw.vehicleRegistrationNumber,
+    owner: raw.customerName,
+    service: raw.categoryName,
+    date: raw.schedule.date,
+    time: raw.schedule.slotStartingTime,
+    status: mapStatus(raw.status),
+  };
+}
+
+const STATUS_TO_API: Record<Status, string> = {
+  Completed: "completed",
+  Ongoing: "assigned", // note: backend distinguishes "assigned" vs "in-progress" — see note below
+  Cancelled: "cancelled",
+  Pending: "confirmed",
+}
 /* ─── Stat SVG Icons ─────────────────────────────────────────── */
 const IconCalendar = ({ color }: { color: string }) => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -108,25 +145,22 @@ export default function BookingsDashboard() {
 
   useEffect(() => { setTimeout(() => setMounted(true), 50); }, []);
 
-  const filtered = ALL_BOOKINGS.filter(b => {
-    const q = search.toLowerCase();
-    const matchSearch = b.vehicle.toLowerCase().includes(q) || b.owner.toLowerCase().includes(q) || b.service.toLowerCase().includes(q);
-    const matchStatus = statusFilter === "All" || b.status === statusFilter;
-    return matchSearch && matchStatus;
-  });
+const apiStatus = statusFilter === "All" ? undefined : STATUS_TO_API[statusFilter];
+const { data,isLoading} = useMechanicBookings(page,PER_PAGE,apiStatus,search || undefined)
 
-  const totalPages = Math.ceil(filtered.length / PER_PAGE);
-  const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+const paginated:Booking[] = (data?.data??[]).map(mapToDisplayBooking)
+const total = data?.data??0
+const totalPages = data?.totalPages ?? 1 
 
-  useEffect(() => {
+useEffect(() => {
     setRowVisible([]);
     const timers = paginated.map((_, i) =>
-      setTimeout(() => setRowVisible(v => { const n = [...v]; n[i] = true; return n; }), i * 80)
+      setTimeout(() => setRowVisible((v) => { const n = [...v]; n[i] = true; return n; }), i * 80)
     );
     return () => timers.forEach(clearTimeout);
-  }, [page, search, statusFilter]);
+  }, [page, search, statusFilter, data]);
 
-  const selectedBooking = ALL_BOOKINGS.find(b => b.id === viewId);
+  const selectedBooking = paginated.find((b) => b.id === viewId);
 
 
   
@@ -423,7 +457,7 @@ export default function BookingsDashboard() {
           animation: mounted ? "fadeSlideUp 0.5s ease 0.3s both" : "none",
         }}>
           <span style={{ fontSize: 13, color: "rgba(255,255,255,0.3)" }}>
-            Showing {Math.min((page - 1) * PER_PAGE + 1, filtered.length)}–{Math.min(page * PER_PAGE, filtered.length)} of {filtered.length} bookings
+            Showing {Math.min((page - 1) * PER_PAGE + 1, filter.length)}–{Math.min(page * PER_PAGE, filter.length)} of {filter.length} bookings
           </span>
           <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
             <button className="page-btn" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} style={{

@@ -8,7 +8,7 @@ import { useSlotManagement } from "../hooks/useSlotManagement";
 
 interface Slot {
   time: string;
-  maxBookings: number;
+  maxBooking: number;
   bookedCount: number;
   status: "available" | "full" | "blocked";
 }
@@ -436,7 +436,7 @@ function SlotBreakdownTable({
                     {to12Hour(slot.time)} – {to12Hour(addMinutes(slot.time, 60))}
                   </td>
                   <td className="py-3.5 pr-4 text-slate-300">{slot.bookedCount}</td>
-                  <td className="py-3.5 pr-4 text-slate-300">{slot.maxBookings}</td>
+                  <td className="py-3.5 pr-4 text-slate-300">{slot.maxBooking}</td>
                   <td className="py-3.5 pr-4">
                     <StatusBadge status={slot.status} />
                   </td>

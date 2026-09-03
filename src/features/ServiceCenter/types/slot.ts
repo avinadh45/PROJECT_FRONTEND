@@ -1,6 +1,6 @@
 export interface Slot {
   time: string;
-  maxBookings: number;
+  maxBooking: number;
   bookedCount: number;
   status: "available" | "full" | "blocked";
 }
