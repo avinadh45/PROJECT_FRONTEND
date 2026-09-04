@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useMechanicBookings } from "../hooks/useMechanicBookings";
+import { useNavigate } from "react-router-dom";
 
 
 /* ─── Types ─────────────────────────────────────────────────── */
@@ -13,23 +14,6 @@ interface Booking {
   time: string;
   status: Status;
 }
-
-/* ─── Mock Data ──────────────────────────────────────────────── */
-const ALL_BOOKINGS: Booking[] = [
-  { id: 1, vehicle: "KL 8 UD 1322", owner: "Arjun Menon",    service: "Brake Check",       date: "Mar 15, 2026", time: "10:30 AM", status: "Completed" },
-  { id: 2, vehicle: "KL 39 JD 8569",owner: "Priya Nair",     service: "Tyre Replacement",  date: "Feb 12, 2026", time: "02:15 PM", status: "Ongoing" },
-  { id: 3, vehicle: "KL 75 AB 2311", owner: "Rahul Das",      service: "Oil Change",        date: "Feb 10, 2026", time: "09:00 AM", status: "Completed" },
-  { id: 4, vehicle: "KL 7 NM 4888",  owner: "Sneha Pillai",  service: "Brake Check",       date: "Feb 9, 2026",  time: "03:45 PM", status: "Cancelled" },
-  { id: 5, vehicle: "KL 04 CJ 7721", owner: "Rohan Varma",   service: "AC Service",        date: "Mar 1, 2026",  time: "11:00 AM", status: "Pending" },
-  { id: 6, vehicle: "KL 22 BX 9910", owner: "Ananya Krishnan",service: "Full Service",     date: "Mar 3, 2026",  time: "08:30 AM", status: "Completed" },
-  { id: 7, vehicle: "KL 11 PQ 3345", owner: "Vijay Kumar",   service: "Engine Repair",     date: "Mar 5, 2026",  time: "01:00 PM", status: "Ongoing" },
-  { id: 8, vehicle: "KL 55 RT 6612", owner: "Meena Suresh",  service: "Tyre Rotation",     date: "Mar 6, 2026",  time: "04:15 PM", status: "Pending" },
-  { id: 9, vehicle: "KL 88 DL 4423", owner: "Arun Babu",     service: "Brake Check",       date: "Mar 7, 2026",  time: "10:00 AM", status: "Cancelled" },
-  { id: 10,vehicle: "KL 33 MN 2200", owner: "Lakshmi Raj",   service: "Oil Change",        date: "Mar 8, 2026",  time: "09:45 AM", status: "Completed" },
-  { id: 11,vehicle: "KL 66 SB 8811", owner: "Deepak Nambiar",service: "AC Service",        date: "Mar 10, 2026", time: "03:00 PM", status: "Ongoing" },
-  { id: 12,vehicle: "KL 14 VT 5500", owner: "Geetha Mohan",  service: "Full Service",      date: "Mar 12, 2026", time: "11:30 AM", status: "Pending" },
-];
-
 const PER_PAGE = 4;
 
 /* ─── Status config ──────────────────────────────────────────── */
@@ -72,7 +56,7 @@ function mapToDisplayBooking(raw: any): Booking {
 
 const STATUS_TO_API: Record<Status, string> = {
   Completed: "completed",
-  Ongoing: "assigned", // note: backend distinguishes "assigned" vs "in-progress" — see note below
+  Ongoing: "assigned",
   Cancelled: "cancelled",
   Pending: "confirmed",
 }
@@ -142,7 +126,7 @@ export default function BookingsDashboard() {
   const [mounted, setMounted] = useState(false);
   const [rowVisible, setRowVisible] = useState<boolean[]>([]);
   const tableRef = useRef<HTMLDivElement>(null);
-
+  const navigate = useNavigate()
   useEffect(() => { setTimeout(() => setMounted(true), 50); }, []);
 
 const apiStatus = statusFilter === "All" ? undefined : STATUS_TO_API[statusFilter];
@@ -257,7 +241,7 @@ useEffect(() => {
           marginBottom: 32,
           animation: mounted ? "fadeSlideUp 0.5s ease 0.15s both" : "none",
         }}>
-          {STATS.map((s, i) => (
+          {STATS.map((s, ) => (
             <div key={s.label} className="stat-card" style={{
               background: "rgba(255,255,255,0.03)",
               border: "1px solid rgba(255,255,255,0.07)",
@@ -436,7 +420,7 @@ useEffect(() => {
 
                 {/* Action */}
                 <div>
-                  <button className="btn-view" onClick={() => setViewId(b.id)} style={{
+                  <button className="btn-view" onClick={() => navigate(`/mechanic/bookings/${b.id}`)} style={{
                     padding: "7px 18px", borderRadius: 8,
                     border: "1px solid rgba(34,211,238,0.35)",
                     background: "rgba(34,211,238,0.08)",

@@ -42,6 +42,7 @@ const Bookings = lazy(()=> import("../features/ServiceCenter/pages/Booking.tsx")
 // ── Mechanic ──────────────────────────────────────────
 const MechanicLogin = lazy(() => import('../features/Mechanic/pages/login.tsx'));
 const MechanicBashboard = lazy(() => import("../features/Mechanic/pages/Dahboard.tsx"));
+const MechanicBookingDetails = lazy(()=> import("../features/Mechanic/pages/BookingDetails.tsx"))
 
 // ── Admin ─────────────────────────────────────────────
 const AdminLogin = lazy(() => import('../features/Admin/pages/Login.tsx'));
@@ -90,6 +91,7 @@ function AppRoutes() {
         </Route>
         <Route path="/mechanic/login" element={<MechanicLogin />} />
         <Route path="/mechanic/dashboard" element={<MechanicProtectedRoute><MechanicBashboard /></MechanicProtectedRoute>} />
+        <Route path='/mechanic/bookings/:bookingId' element={<MechanicProtectedRoute><MechanicBookingDetails/></MechanicProtectedRoute>}/>
 
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminProtectedRoute><AdminLayout /></AdminProtectedRoute>}>

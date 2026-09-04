@@ -44,7 +44,8 @@ export const API_ROUTES = {
       if(status) params.set("status",status)
       if(search) params.set("search",search)
         return `/mechanic/bookings?${params.toString()}`
-    }
+    },
+    BOOKING_DETAILS:(bookingId:string)=>`/mechanic/bookings/${bookingId}`
   },
   ADMIN: {
     LOGIN: "/admin/login",
