@@ -31,7 +31,8 @@ export const API_ROUTES = {
       if(status) params.set("status",status)
       if(search) params.set("search",search) 
         return `/service-center/bookings?${params.toString()}`
-    }
+    },
+    BOOKING_DETAILS:(bookingId:string)=>`/service-center/bookings/${bookingId}`
     
   },
   MECHANIC: {
@@ -45,7 +46,10 @@ export const API_ROUTES = {
       if(search) params.set("search",search)
         return `/mechanic/bookings?${params.toString()}`
     },
-    BOOKING_DETAILS:(bookingId:string)=>`/mechanic/bookings/${bookingId}`
+    BOOKING_DETAILS:(bookingId:string)=>`/mechanic/bookings/${bookingId}`,
+    UPDATE_JOB:(bookingId:string)=>`/mechanic/bookings/${bookingId}/job`,
+    UPDATE_STATUS:(bookingId:string)=>`/mechanic/bookings/${bookingId}/status`,
+    UPLOAD_PROOF:(bookingId:string)=>`/mechanic/bookings/${bookingId}/proof`
   },
   ADMIN: {
     LOGIN: "/admin/login",

@@ -2,7 +2,7 @@ import axiosClient from "../../../shared/api/axiosClient";
 import { API_ROUTES } from "../../../shared/api/apiRoutes";
 import type { MechanicLoginDTO,MechanicAuthResponse,CreateMechanicDTO,MechanicResponse } from "../interface/Mechanic";
 import type { PaginationMechanicResponse } from "../interface/pagination";
-import type { MechanicBookingDetail, PaginatedMechanicBookings } from "../type/BookingInMechanic";
+import type { JobItemPayload, MechanicBookingDetail, PaginatedMechanicBookings } from "../type/BookingInMechanic";
 
  export const LoginMechanic = async(data:MechanicLoginDTO):Promise<MechanicAuthResponse>=>{
     const mechanic = await axiosClient.post(API_ROUTES.MECHANIC.LOGIN,data)
@@ -29,5 +29,23 @@ export const fetchMechanicBookings = async(page:number,limit:number,status?:stri
 export const fetchMechanicBookingDetails = async(bookingId:string):Promise<MechanicBookingDetail>=>{
 
   const res = await axiosClient.get(API_ROUTES.MECHANIC.BOOKING_DETAILS(bookingId))
+  return res.data.data
+}
+
+export const updateStatus = async(bookingId:string,status:string):Promise<MechanicBookingDetail>=>{
+
+  const res = await axiosClient.patch(API_ROUTES.MECHANIC.UPDATE_STATUS(bookingId),{status})
+  return res.data.data
+}
+export const updateJobItems = async(bookingId:string,items:JobItemPayload[]):Promise<MechanicBookingDetail>=>{
+
+  const res = await axiosClient.patch(API_ROUTES.MECHANIC.UPDATE_JOB(bookingId),{items})
+  return res.data.data
+}
+export const uploadCompletionProof = async(bookingId:string,formDate:FormData):Promise<MechanicBookingDetail>=>{
+
+  const res = await axiosClient.patch(API_ROUTES.MECHANIC.UPLOAD_PROOF(bookingId),formDate,{
+    headers:{ "Content-Type":"multipart/form-data"}
+  })
   return res.data.data
 }

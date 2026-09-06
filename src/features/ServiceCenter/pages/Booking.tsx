@@ -501,6 +501,7 @@ function BookingRow({
   booking: Booking;
   onView: (bookingId: string) => void;
 }) {
+  const navigate = useNavigate()
   const { date, time } = formatDateTime(booking.schedule.date, booking.schedule.slotStartingTime);
   const dimmed = booking.status === "cancelled" || booking.status === "failed_slot_unavailable";
 
@@ -540,7 +541,7 @@ function BookingRow({
       </td>
       <td className="whitespace-nowrap px-4 py-3.5">
         <button
-          onClick={() => onView(booking.id)}
+          onClick={() => navigate(`/service-center/bookings/${booking.id}`)}
           className="rounded-lg border border-cyan-400/40 px-3 py-1.5 text-xs font-medium text-cyan-300 transition-colors hover:bg-cyan-400/10"
         >
           View

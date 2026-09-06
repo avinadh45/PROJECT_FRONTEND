@@ -8,7 +8,7 @@ import type {
   ServiceCenterLoginDTO,
 } from "../interface/serviceCenter";
 import type { Subscription } from "../types/subscription";
-import type { PaginatedBookings } from "../interface/bookingInterface";
+import type { PaginatedBookings, ServiceCenterBookingDetail } from "../interface/bookingInterface";
 // import type { AvailabilityFormDat } from "../types/slot";
 
 export const registerServicCenter = async (
@@ -132,4 +132,10 @@ export const Getsubscription = async ()=>{
 
     const res = await axiosClient.get(API_ROUTES.SERVICE_CENTER.LIST(page,limit,status,seaarch))
     return res.data.data  
+  }
+
+  export const fetchServiceCenterBookingDetails = async(bookingId:string): Promise<ServiceCenterBookingDetail>=>{
+
+    const res = await axiosClient.get(API_ROUTES.SERVICE_CENTER.BOOKING_DETAILS(bookingId))
+    return res.data.data
   }

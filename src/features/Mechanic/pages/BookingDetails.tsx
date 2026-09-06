@@ -1,4 +1,6 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { updateJobItems, updateStatus, uploadCompletionProof } from "../services/MechanicService";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -9,6 +11,8 @@ import {
   Plus,
   Loader2,
   Car,
+  Camera,
+  X,
 } from "lucide-react";
 import { useMechanicBookingDetails } from "../hooks/useMechanicBookingDetail";
 
@@ -16,7 +20,7 @@ import { useMechanicBookingDetails } from "../hooks/useMechanicBookingDetail";
  * Types
  * ──────────────────────────────────────────────────────────────────────── */
 
-type BookingStatus = "Assigned" | "In Progress" | "Completed";
+type BookingStatus = "assigned" | "in-progress" | "completed";
 
 interface DiagnosisItem {
   id: string;
@@ -31,12 +35,12 @@ interface DiagnosisItem {
  * Status config
  * ──────────────────────────────────────────────────────────────────────── */
 
-const STATUS_ORDER: BookingStatus[] = ["Assigned", "In Progress", "Completed"];
+const STATUS_ORDER: BookingStatus[] = ["assigned", "in-progress", "completed"];
 
 const STATUS_STYLES: Record<BookingStatus, { text: string; bg: string; ring: string; dot: string }> = {
-  Assigned: { text: "text-cyan-300", bg: "bg-cyan-400/10", ring: "ring-cyan-400/30", dot: "bg-cyan-400" },
-  "In Progress": { text: "text-blue-300", bg: "bg-blue-400/10", ring: "ring-blue-400/30", dot: "bg-blue-400" },
-  Completed: { text: "text-emerald-300", bg: "bg-emerald-400/10", ring: "ring-emerald-400/30", dot: "bg-emerald-400" },
+  assigned: { text: "text-cyan-300", bg: "bg-cyan-400/10", ring: "ring-cyan-400/30", dot: "bg-cyan-400" },
+  "in-progress": { text: "text-blue-300", bg: "bg-blue-400/10", ring: "ring-blue-400/30", dot: "bg-blue-400" },
+  completed: { text: "text-emerald-300", bg: "bg-emerald-400/10", ring: "ring-emerald-400/30", dot: "bg-emerald-400" },
 };
 
 /* ────────────────────────────────────────────────────────────────────────
@@ -109,14 +113,21 @@ export default function MechanicJobCardPage() {
   const [isSavingItems, setIsSavingItems] = useState(false);
   const [isSavingStatus, setIsSavingStatus] = useState(false);
 
+  /* ── Completion proof state ─────────────────────────────────────────── */
+  const [proofFile, setProofFile] = useState<File | null>(null);
+  const [proofPreviewUrl, setProofPreviewUrl] = useState<string | null>(null);
+  const [isDraggingProof, setIsDraggingProof] = useState(false);
+  const [proofError, setProofError] = useState<string | null>(null);
+  const proofInputRef = useRef<HTMLInputElement>(null);
+
   const canAddItem = form.issueFound.trim().length > 0 && form.estimatedTime.trim().length > 0;
 
   function toDisplayStatus(raw: string): BookingStatus {
     const map: Record<string, BookingStatus> = {
-      assigned: "Assigned",
-      "in-progress": "In Progress",
-      in_progress: "In Progress",
-      completed: "Completed",
+      assigned: "assigned",
+      "in-progress": "in-progress",
+      in_progress: "in-progress",
+      completed: "completed",
     };
     return map[raw.toLowerCase()] ?? "Assigned";
   }
@@ -139,6 +150,14 @@ export default function MechanicJobCardPage() {
       );
     }
   }, [booking]);
+
+  // Revoke the local object URL when it's replaced or the component unmounts,
+  // so we don't leak blob URLs.
+  useEffect(() => {
+    return () => {
+      if (proofPreviewUrl) URL.revokeObjectURL(proofPreviewUrl);
+    };
+  }, [proofPreviewUrl]);
 
   function resetForm() {
     setForm(emptyForm);
@@ -179,28 +198,98 @@ export default function MechanicJobCardPage() {
     if (editingId === id) resetForm();
   }
 
+  /* ── Completion proof handlers ──────────────────────────────────────── */
+
+  function handleProofFileSelect(file: File | null) {
+    setProofError(null);
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setProofError("Please select an image file.");
+      return;
+    }
+    if (proofPreviewUrl) URL.revokeObjectURL(proofPreviewUrl);
+    setProofFile(file);
+    setProofPreviewUrl(URL.createObjectURL(file));
+  }
+
+  function handleRemoveProofSelection() {
+    if (proofPreviewUrl) URL.revokeObjectURL(proofPreviewUrl);
+    setProofFile(null);
+    setProofPreviewUrl(null);
+    setProofError(null);
+    if (proofInputRef.current) proofInputRef.current.value = "";
+  }
+
+  function handleProofDragOver(e: React.DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    setIsDraggingProof(true);
+  }
+
+  function handleProofDragLeave() {
+    setIsDraggingProof(false);
+  }
+
+  function handleProofDrop(e: React.DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    setIsDraggingProof(false);
+    const file = e.dataTransfer.files?.[0] ?? null;
+    handleProofFileSelect(file);
+  }
+
   const grandTotalCost = items.reduce((sum, it) => sum + (it.estimatedCost || 0), 0);
   const totalEstimatedTime = useMemo(() => summarizeEstimatedTime(items), [items]);
+  const queryClient = useQueryClient();
+
+  const existingProofUrl =  booking?.proof?.imageUrl
+  const existingProofUploadedAt = booking?.proof?.uploadedAt
 
   async function handleSaveJobCard() {
     setIsSavingItems(true);
+    setProofError(null);
     try {
-      // await bookingsApi.saveJobCardItems(booking.id, items);
-      await new Promise((r) => setTimeout(r, 900));
+      const payload = items.map((item) => ({
+        jobItemsId: item.id,
+        issueFound: item.issueFound,
+        spareParts: item.sparePart ?? "",
+        sparePartQty: item.quantity ?? 0,
+        estimatedTime: item.estimatedTime ?? "",
+        initalCost: item.estimatedCost ?? 0,
+      }));
+      await updateJobItems(bookingId!, payload);
+
+ 
+     
+
+      queryClient.invalidateQueries({ queryKey: ["mechanic-booking-details", bookingId] });
     } finally {
       setIsSavingItems(false);
     }
   }
 
-  async function handleUpdateStatus() {
-    setIsSavingStatus(true);
-    try {
-      // await bookingsApi.updateStatus(booking.id, status);
-      await new Promise((r) => setTimeout(r, 700));
-    } finally {
-      setIsSavingStatus(false);
+async function handleUpdateStatus() {
+  setIsSavingStatus(true);
+  setProofError(null);
+  try {
+    await updateStatus(bookingId!, status!);
+
+    if (status === "completed" && proofFile) {
+      try {
+        const formData = new FormData();
+        formData.append("proofImage", proofFile);
+        await uploadCompletionProof(bookingId!, formData);
+      
+        await queryClient.invalidateQueries({ queryKey: ["mechanic-booking-details", bookingId] });
+        handleRemoveProofSelection();
+      } catch {
+        setProofError("Upload failed — try again.");
+      }
+    } else {
+      await queryClient.invalidateQueries({ queryKey: ["mechanic-booking-details", bookingId] });
     }
+  } finally {
+    setIsSavingStatus(false);
   }
+}
 
   if (isLoading) {
     return <div className="min-h-screen bg-[#060a14] text-white p-6">Loading...</div>;
@@ -503,9 +592,71 @@ export default function MechanicJobCardPage() {
                 style={{ background: "linear-gradient(135deg, #3b82f6, #06b6d4)" }}
               >
                 {isSavingItems && <Loader2 className="h-4 w-4 animate-spin" />}
-                Save Job Card
+                {status === "completed" && proofFile ? "Save Job Card & Proof" : "Save Job Card"}
               </button>
             </SectionCard>
+
+            {/* Completion proof */}
+            <SectionCard title="Completion Proof" subtitle="Upload a photo showing the completed work.">
+  {existingProofUrl ? (
+    <div>
+      <img
+        src={existingProofUrl}
+        alt="Completion proof"
+        className="w-full max-h-64 rounded-xl border border-white/10 object-cover"
+      />
+      <p className="mt-2 font-dm-sans text-xs text-white/40">
+        Uploaded {existingProofUploadedAt ? new Date(existingProofUploadedAt).toLocaleString() : ""}
+      </p>
+    </div>
+  ) : status !== "completed" ? (
+    <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-white/10 px-4 py-8 text-center opacity-50">
+      <Camera className="h-6 w-6 text-white/30" />
+      <p className="font-dm-sans text-sm text-white/40">
+        You'll be able to upload proof once the job is marked Completed.
+      </p>
+    </div>
+  ) : proofPreviewUrl ? (
+    <div className="relative w-fit">
+      <img
+        src={proofPreviewUrl}
+        alt="Selected proof"
+        className="h-32 rounded-xl border border-white/10 object-cover"
+      />
+      <button
+        onClick={handleRemoveProofSelection}
+        aria-label="Remove selected image"
+        className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white hover:bg-red-400"
+      >
+        <X className="h-3.5 w-3.5" />
+      </button>
+    </div>
+  ) : (
+    <div
+      onClick={() => proofInputRef.current?.click()}
+      onDragOver={handleProofDragOver}
+      onDragLeave={handleProofDragLeave}
+      onDrop={handleProofDrop}
+      className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-8 text-center transition ${
+        isDraggingProof ? "border-cyan-400/50 bg-cyan-400/5" : "border-white/15 hover:border-white/25"
+      }`}
+    >
+      <Camera className="h-6 w-6 text-white/40" />
+      <p className="font-dm-sans text-sm text-white/50">Click or drag a photo here</p>
+      <input
+        ref={proofInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => handleProofFileSelect(e.target.files?.[0] ?? null)}
+      />
+    </div>
+  )}
+
+  {proofError && (
+    <p className="mt-2 font-dm-sans text-xs text-red-400">{proofError}</p>
+  )}
+</SectionCard>
 
             {/* Status */}
             <SectionCard title="Update Status">

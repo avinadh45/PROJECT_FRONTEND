@@ -16,6 +16,7 @@ export interface PaginatedMechanicBookings {
   limit: number;
   totalPages: number;
 }
+
 export interface MechanicBookingDetail {
   id: string;
   status: string;
@@ -23,10 +24,10 @@ export interface MechanicBookingDetail {
   customerName: string;
   customerPhone: string;
   vehicleRegistrationNumber: string;
-  vehicleType: string;          // new
+  vehicleType: string;          
   vehicleBrand: string;
   vehicleModel: string;
-  vehiclePhotoUrl: string | null;  // new
+  vehiclePhotoUrl: string | null;  
   categoryName: string;
   schedule: {
     date: string;
@@ -47,4 +48,17 @@ export interface MechanicBookingDetail {
       initalCost: number;
     }[];
   } | null;
+  proof:{
+    imageUrl: string;
+    uploadedBy: string;
+    uploadedAt: string;
+  }|null
+}
+export interface JobItemPayload {
+  jobItemsId: string;
+  issueFound: string;
+  spareParts: string;
+  sparePartQty: number;
+  estimatedTime: string;
+  initalCost: number;
 }
