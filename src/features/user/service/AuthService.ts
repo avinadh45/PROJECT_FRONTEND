@@ -7,7 +7,7 @@ import type {
 } from "../interface/authinterface";
 import type{ VehicleApiResponse,VehicleListApiResponse } from "../interface/vehicleIntraface";
 import { API_ROUTES } from "../../../shared/api/apiRoutes";
-import type { BookingConfirmation, BookingOrderPayload, BookingOrderResult, GarageFilter, VerifyPaymentPayload } from "../interface/bookingInterface";
+import type { BookingConfirmation, BookingOrderPayload, BookingOrderResult, GarageFilter, PaginatedUserBookings, UserBookingDetail, VerifyPaymentPayload } from "../interface/bookingInterface";
 
 export const Register = async (data: RegisterDTO): Promise<AuthResponse> => {
   const {...user} = data
@@ -118,4 +118,16 @@ export const fetchBookingById  = async(bookingId:string): Promise<BookingConfirm
 
   const res = await axiosClient.get(API_ROUTES.BOOKING.GET_BY_ID(bookingId))
   return res.data.data 
+}
+
+export const fetchUserBookings = async(page:number,limit:number,status?:string,search?:string):Promise<PaginatedUserBookings>=>{
+
+  const res = await axiosClient.get(API_ROUTES.USER.MY_BOOKING(page,limit,status,search))
+  return res.data.data
+}
+
+export const fetchUserBookingDetails = async(bookingId:string):Promise<UserBookingDetail>=>{
+
+  const res = await axiosClient.get(API_ROUTES.USER.BOOKING_DETAILS(bookingId))
+  return res.data.data
 }

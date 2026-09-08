@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { useServiceCenterBookingDetail } from "../hooks/useServiceCenterBookingDetail";
 import type { ServiceCenterBookingDetail } from "../interface/bookingInterface";
-import Topbar from "../components/TopBar";
+import  PickUpMapView from "../../../shared/components/PickUpMapView"
 
 export type BookingStatus =
   | "assigned"
@@ -136,25 +136,7 @@ function StatusPill({ status }: { status: BookingStatus }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Pickup map — falls back to a static, read-only visual when no shared map
-// component is wired in. Replace with the project's MapPicker in read-only
-// mode if available (single marker, no click-to-select).
-// ---------------------------------------------------------------------------
 
-function PickupMap({ lat, lng }: { lat: number; lng: number }) {
-  return (
-    <div className="relative mt-3 h-48 w-full overflow-hidden rounded-xl border border-white/10 bg-[#060a14]">
-      <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(to_right,white_1px,transparent_1px),linear-gradient(to_bottom,white_1px,transparent_1px)] [background-size:24px_24px]" />
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-        <MapPin className="h-7 w-7 text-cyan-400" fill="currentColor" fillOpacity={0.15} />
-        <span className="font-[DM_Sans] text-xs text-white/50">
-          {lat.toFixed(5)}, {lng.toFixed(5)}
-        </span>
-      </div>
-    </div>
-  );
-}
 
 function StatusTimelineSection({ entries }: { entries: StatusTimelineEntry[] }) {
   if (!entries || entries.length === 0) {
@@ -304,10 +286,7 @@ export default function ServiceCenterBookingDetailsPage() {
 
   return (
     <div className="pb-16">
-      {/* <Topbar
-        title="Booking Details"
-        subtitle={`${booking.vehicleRegistrationNumber} · ${booking.categoryName}`}
-      /> */}
+  
 
       <div className="mx-auto flex max-w-3xl flex-col gap-5 px-4 pt-6 sm:px-6">
         {/* Back + status row — replaces the old page-owned sticky header */}
@@ -379,7 +358,7 @@ export default function ServiceCenterBookingDetailsPage() {
         {showPickupSection && booking.pickupLocation && (
           <Card title="Pickup Location" icon={<MapPin className="h-5 w-5 text-cyan-400" />}>
             <p className="font-[DM_Sans] text-sm text-white/70">{booking.pickupLocation.formatedAddress}</p>
-            <PickupMap lat={booking.pickupLocation.coordinates[1]} lng={booking.pickupLocation.coordinates[0]} />
+            <PickUpMapView lat={booking.pickupLocation.coordinates[1]} lng={booking.pickupLocation.coordinates[0]} />
           </Card>
         )}
 

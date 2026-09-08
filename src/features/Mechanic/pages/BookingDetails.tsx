@@ -13,7 +13,9 @@ import {
   Car,
   Camera,
   X,
+  MapPin
 } from "lucide-react";
+import  PickUpMapView from "../../../shared/components/PickUpMapView"
 import { useMechanicBookingDetails } from "../hooks/useMechanicBookingDetail";
 
 /* ────────────────────────────────────────────────────────────────────────
@@ -379,6 +381,30 @@ async function handleUpdateStatus() {
                 </div>
               </div>
             </SectionCard>
+            {booking.visitType === "pickup-drop" && (
+  <SectionCard title="Pickup Location">
+    <div className="flex items-center gap-2 mb-3">
+      <MapPin className="h-4 w-4 text-cyan-400" />
+    </div>
+    {booking.pickupLocation ? (
+      <>
+        <p className="font-dm-sans text-sm text-white/70">
+          {booking.pickupLocation.formatedAddress}
+        </p>
+        <div className="mt-3 overflow-hidden rounded-xl border border-white/10">
+          <PickUpMapView
+            lat={booking.pickupLocation.coordinates[1]}
+            lng={booking.pickupLocation.coordinates[0]}
+          />
+        </div>
+      </>
+    ) : (
+      <p className="font-dm-sans text-sm text-white/40">
+        Pickup address not available.
+      </p>
+    )}
+  </SectionCard>
+)}
 
             {/* Reported issue */}
             <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">

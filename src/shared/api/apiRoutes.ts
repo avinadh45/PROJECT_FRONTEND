@@ -8,6 +8,13 @@ export const API_ROUTES = {
     RESET_PASSWORD: "/reset-password",
     GOOGLE_LOGIN: "/google-login",
     LOGOUT: "/logout",
+    MY_BOOKING:(page:number,limit:number,status?:string,search?:string)=>{
+      const params = new URLSearchParams({page:String(page),limit:String(limit)})
+      if(status)params.set("status",status)
+        if(search)params.set("search",search)
+          return `/my-bookings?${params.toString()}`
+    },
+    BOOKING_DETAILS:(bookingId:string)=>`/details/${bookingId}`
   },
   SERVICE_CENTER: {
     REGISTER: "/service-center/register",
@@ -32,7 +39,8 @@ export const API_ROUTES = {
       if(search) params.set("search",search) 
         return `/service-center/bookings?${params.toString()}`
     },
-    BOOKING_DETAILS:(bookingId:string)=>`/service-center/bookings/${bookingId}`
+    BOOKING_DETAILS:(bookingId:string)=>`/service-center/bookings/${bookingId}`,
+
     
   },
   MECHANIC: {

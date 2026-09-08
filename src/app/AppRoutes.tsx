@@ -23,6 +23,8 @@ const EditVehiclePage = lazy(() => import('../features/user/pages/EditVehicle.ts
 const VehicleDetailPage = lazy(()=> import('../features/user/pages/VehicleDetails.tsx'))
 const Booking = lazy(()=> import('../features/user/pages/Booking.tsx'))
 const BookingConfirmation = lazy(()=> import ("../features/user/pages/BookingConfirmation.tsx"))
+const BookingHistory = lazy(()=> import('../features/user/pages/BookingHistoryPage.tsx'))
+const UserBookingDetails = lazy(()=> import("../features/user/pages/BookingDetails.tsx"))
 
 // ── Service Center ────────────────────────────────────
 const ServiceCenterLogin = lazy(() => import("../features/ServiceCenter/pages/login.tsx"));
@@ -72,6 +74,8 @@ function AppRoutes() {
         <Route path='/vehicle/update/:id' element={<UserProtectedRoute><EditVehiclePage /></UserProtectedRoute>} />
         <Route path='/booking' element={<UserProtectedRoute><Booking /></UserProtectedRoute>} />
         <Route path = "/booking-confirmed/:bookingId" element={<UserProtectedRoute><BookingConfirmation/></UserProtectedRoute>}/>
+        <Route path = "/my-bookings" element={<UserProtectedRoute><BookingHistory/></UserProtectedRoute>}/>
+        <Route path = "/details/:bookingId" element={<UserProtectedRoute><UserBookingDetails/></UserProtectedRoute>}/>
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/service-center/login" element={<ServiceCenterLogin />} />

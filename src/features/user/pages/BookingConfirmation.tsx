@@ -10,7 +10,7 @@ const navLinks = [
   { label: "Add Vehicle", href: "/add-vehicle" },
   { label: "My Vehicle", href: "/my-vehicle" },
   { label: "Repair", href: "/booking" },
-  { label: "History", href: "/history" },
+  { label: "History", href: "/my-bookings" },
 ];
 export default function BookingConfirmedPage() {
   const { bookingId } = useParams<{ bookingId: string }>();
@@ -108,7 +108,7 @@ export default function BookingConfirmedPage() {
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <button
             type="button"
-            onClick={() => navigate("/history")}
+            onClick={() => navigate("/my-bookings")}
             className="flex flex-1 items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white"
             style={{ background: "linear-gradient(135deg, #3b82f6, #06b6d4)", fontFamily: "'DM Sans', sans-serif" }}
           >

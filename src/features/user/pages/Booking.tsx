@@ -49,7 +49,7 @@ const navLinks = [
   { label: "Add Vehicle", href: "/add-vehicle" },
   { label: "My Vehicle", href: "/my-vehicle" },
   { label: "Repair", href: "/booking" },
-  { label: "History", href: "/history" },
+  { label: "History", href: "/my-bookings" },
 ];
 
 

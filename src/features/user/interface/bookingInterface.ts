@@ -1,5 +1,12 @@
-
 export type ServiceMode = "drive-in" | "pickup-drop";
+
+export type BookingStatus =
+  | "assigned"
+  | "in-progress"
+  | "completed"
+  | "cancelled"
+  | "pending_payment"
+  | "failed_slot_unavailable";
 
 export interface GarageFilter {
   categoryId: string;
@@ -65,4 +72,59 @@ export interface BookingConfirmation{
     status:"pending" | "paid" | "failed"
     paidAt?:string
   }
+}
+export interface UserBookingSummary {
+  id: string;
+  vehicleRegistrationNumber: string;
+  vehiclePhotoUrl: string | null;
+  categoryName: string;
+  garageName: string;
+  visitType: "drive-in" | "pickup-drop";
+  schedule: { date: string; slotStartingTime: string; slotEndingTime: string };
+  status: string;
+  advancePaymentStatus: "pending" | "paid" | "failed";
+}
+
+export interface PaginatedUserBookings {
+  data: UserBookingSummary[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface UserBookingDetail {
+  id: string;
+  status: BookingStatus;
+  visitType: "drive-in" | "pickup-drop";
+  vehicleRegistrationNumber: string;
+  vehicleType: string;
+  vehicleBrand: string;
+  vehicleModel: string;
+  vehiclePhotoUrl: string | null;
+  categoryName: string;
+  garageName: string;
+  garagePhone: string;
+  garageEmail: string;
+  garageAddress: string | null;
+  mechanicName: string | null;
+  schedule: { date: string; slotStartingTime: string; slotEndingTime: string };
+  additionalInfo: string | null;
+  statusTimeline: { status: string; updatedBy: string; at: string }[];
+  job: {
+    reportedIssue: string;
+    estimatedTime: string;
+    estimatedCost: number;
+    description: {
+      jobItemsId: string;
+      issueFound: string;
+      spareParts: string;
+      sparePartQty: number;
+      estimatedTime: string;
+      initalCost: number;
+    }[];
+  } | null;
+  proof: { imageUrl: string; uploadedBy: string; uploadedAt: string } | null;
+  pickupLocation: { type: "Point"; coordinates: number[]; formatedAddress: string } | null;
+  advancePayment: { amount: number; status: "pending" | "paid" | "failed"; paidAt?: string };
 }
