@@ -78,6 +78,7 @@ function InfoItem({
 
 export default function BookingHistoryPage() {
   const navigate = useNavigate();
+  //const [isCancelling, setIsCancelling] = useState(false);
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
   const [search, setSearch] = useState("");
@@ -86,6 +87,7 @@ export default function BookingHistoryPage() {
   const bookings = data?.data ?? [];
   const total = data?.total ?? 0;
   const totalPages = data?.totalPages ?? 1;
+
 
   
   const pageNumbers = (): (number | "...")[] => {

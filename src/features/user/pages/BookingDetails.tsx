@@ -22,7 +22,9 @@ import { useUserBookingDetails } from "../hooks/useMyBookings";
 import type { UserBookingDetail } from "../interface/bookingInterface";
 import PickUpMapView from "../../../shared/components/PickUpMapView";
 import { useAuth } from "../hooks/useAuth";
-
+import { cancelBooking } from "../service/AuthService";
+import { QueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 /* ------------------------------------------------------------------ */
 /*  NOTE: this Navbar renders fixed at the top (it sits over the page  */
 /*  rather than pushing it down), so every page that uses it needs a   */
@@ -36,7 +38,7 @@ const navLinks = [
   { label: "Add Vehicle", href: "/add-vehicle" },
   { label: "My Vehicle", href: "/my-vehicle" },
   { label: "Repair", href: "/booking" },
-  { label: "History", href: "/history" },
+  { label: "History", href: "/my-bookings" },
 ];
 
 type BookingStatus =
@@ -634,7 +636,7 @@ export default function BookingDetailsPage() {
   const { bookingId } = useParams<{ bookingId: string }>();
   const navigate = useNavigate();
   const { logoutuser } = useAuth();
-
+  const queryclient = useQueryClient();
   const { data: booking, isLoading, isError } = useUserBookingDetails(bookingId as string);
 
   const [isCancelModalOpen, setCancelModalOpen] = useState(false);
@@ -648,14 +650,12 @@ export default function BookingDetailsPage() {
     if (!bookingId) return;
     setIsCancelling(true);
     try {
-      await fetch(`/api/bookings/${bookingId}/cancel`, {
-        method: "PATCH",
-        credentials: "include",
-      });
-      // A toast/notification system elsewhere in the app should surface success/errors,
-      // and the booking query should be invalidated/refetched to reflect the new status.
-    } catch {
-      // Swallow — handled by the app-wide toast system.
+     await cancelBooking(bookingId)
+     queryclient.invalidateQueries({queryKey:["user-booking-detail",bookingId]})
+      
+    } catch(err) {
+      console.error("Faild to cancel booking ",err);
+      
     } finally {
       setIsCancelling(false);
       setCancelModalOpen(false);
@@ -677,9 +677,7 @@ export default function BookingDetailsPage() {
         onLogout={logoutuser}
       />
 
-      {/* pt-24 offsets the fixed Navbar — bump this if the navbar's real height differs.
-          max-w-6xl (vs. the old max-w-4xl) plus the two-column grid below is what actually
-          uses the width on larger screens instead of leaving blank margins either side. */}
+     
       <main className="mx-auto max-w-6xl px-4 pb-12 pt-24 sm:px-6 lg:px-8">
         {isLoading && (
           <div className="flex min-h-[50vh] items-center justify-center">
@@ -724,13 +722,45 @@ export default function BookingDetailsPage() {
                   <GarageInformationCard booking={booking} />
                   <BookingInfoCard booking={booking} />
                 </div>
+                <Card>
+  <SectionTitle>Payment</SectionTitle>
+
+  <div className="flex items-center justify-between">
+    <div>
+      <p className="text-lg font-semibold text-white">
+        ₹{booking.advancePayment.amount}
+      </p>
+
+      <p className="text-xs text-white/40">
+        Advance payment
+      </p>
+    </div>
+
+    {booking.advancePayment.status === "refunded" && (
+      <div className="text-right">
+        <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-400">
+          Refunded
+        </span>
+
+        {booking.advancePayment.refundedAt && (
+          <p className="mt-2 text-xs text-white/40">
+            Refunded on{" "}
+            {new Date(
+              booking.advancePayment.refundedAt
+            ).toLocaleString("en-IN")}
+          </p>
+        )}
+      </div>
+    )}
+  </div>
+</Card>
 
                 <JobCardSection job={booking.job} />
 
                 {booking.status === "completed" && <CompletionProofSection proof={booking.proof} />}
               </div>
 
-              {/* Sticky summary + actions */}
+             
               <div className="lg:col-span-1">
                 <SummarySidebar
                   booking={booking}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -16,6 +16,8 @@ import {
 import { useServiceCenterBookingDetail } from "../hooks/useServiceCenterBookingDetail";
 import type { ServiceCenterBookingDetail } from "../interface/bookingInterface";
 import  PickUpMapView from "../../../shared/components/PickUpMapView"
+import { useQueryClient } from "@tanstack/react-query";
+import { markBookingRefunded } from "../services/ServiceCenterService";
 
 export type BookingStatus =
   | "assigned"
@@ -33,8 +35,9 @@ interface StatusTimelineEntry {
 
 interface PaymentInfo {
   advanceAmount: number;
-  status: "paid" | "pending" | "failed";
+  status: "pending" | "paid" | "failed" | "refund_due" | "refunded";
   paidAt?: string | null;
+   refundedAt?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -233,8 +236,16 @@ function PaymentStatusBadge({ status }: { status: PaymentInfo["status"] }) {
     paid: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
     pending: "bg-amber-500/10 text-amber-400 border-amber-500/30",
     failed: "bg-red-500/10 text-red-400 border-red-500/30",
+    refund_due: "bg-amber-500/10 text-amber-400 border-amber-500/30",
+    refunded: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
   } as const;
-  const labelMap = { paid: "Paid", pending: "Pending", failed: "Failed" } as const;
+  const labelMap = {
+    paid: "Paid",
+    pending: "Pending",
+    failed: "Failed",
+    refund_due: "Refund Due",
+    refunded: "Refunded",
+  } as const;
 
   return (
     <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium font-[DM_Sans] ${map[status]}`}>
@@ -243,16 +254,31 @@ function PaymentStatusBadge({ status }: { status: PaymentInfo["status"] }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Main page — renders INSIDE ServiceCenterLayout's <Outlet/>, so no sidebar,
-// no full-screen background wrapper, no page-owned sticky header. Topbar
-// replaces the old custom header; back button + status pill move into body.
-// ---------------------------------------------------------------------------
+
 
 export default function ServiceCenterBookingDetailsPage() {
   const { bookingId } = useParams<{ bookingId: string }>();
+  const queryclient = useQueryClient()
+  const [isMarkingRefunded, SetIsMarkingRefund] = useState(false)
   const navigate = useNavigate();
 
+  async function handleMarkRefunded(){
+
+    const confirmed = window.confirm(
+    "Confirm you have already processed this refund via the Razorpay dashboard. This action cannot be undone."
+  );
+  if(confirmed){
+    SetIsMarkingRefund(true)
+    try {
+      await markBookingRefunded(bookingId!)
+      queryclient.invalidateQueries({queryKey:["service-center-booking-detail",bookingId]})
+    } catch (err) {
+      console.error("Failed to mark as refund",err);
+    }finally{
+      SetIsMarkingRefund(false)
+    }
+  }
+  }
   const { data: booking, isLoading, isError } = useServiceCenterBookingDetail(bookingId!);
 
   if (isLoading) {
@@ -284,10 +310,8 @@ export default function ServiceCenterBookingDetailsPage() {
   const showPickupSection = booking.visitType === "pickup-drop" && !!booking.pickupLocation;
   const showProofSection = COMPLETED_OR_LATER.includes(booking.status);
 
-  return (
+return (
     <div className="pb-16">
-  
-
       <div className="mx-auto flex max-w-3xl flex-col gap-5 px-4 pt-6 sm:px-6">
         {/* Back + status row — replaces the old page-owned sticky header */}
         <div className="flex items-center justify-between">
@@ -366,7 +390,7 @@ export default function ServiceCenterBookingDetailsPage() {
         <Card title="Reported Issue" icon={<ClipboardList className="h-5 w-5 text-cyan-400" />}>
           {booking.additionalInfo ? (
             <blockquote className="border-l-2 border-cyan-500/40 pl-4 font-[DM_Sans] text-sm italic text-white/60">
-              “{booking.additionalInfo}”
+              "{booking.additionalInfo}"
             </blockquote>
           ) : (
             <p className="font-[DM_Sans] text-sm text-white/40">No additional details provided by customer</p>
@@ -420,27 +444,43 @@ export default function ServiceCenterBookingDetailsPage() {
 
         {/* Payment */}
         <Card title="Payment" icon={<CreditCard className="h-5 w-5 text-cyan-400" />}>
-          {booking.advancePayment ? (
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="font-[Syne] text-lg font-semibold text-white">
-                  {formatCurrency(booking.advancePayment.amount)}
-                </p>
-                <p className="font-[DM_Sans] text-xs text-white/40">Advance payment</p>
-              </div>
-              <div className="flex flex-col items-end gap-1">
-                <PaymentStatusBadge status={booking.advancePayment.status} />
-                {booking.advancePayment.paidAt && (
-                  <span className="font-[DM_Sans] text-xs text-white/40">
-                    {formatDateTime(booking.advancePayment.paidAt)}
-                  </span>
-                )}
-              </div>
-            </div>
-          ) : (
-            <p className="font-[DM_Sans] text-sm text-white/40">No payment recorded yet.</p>
-          )}
-        </Card>
+  <div className="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <p className="font-[Syne] text-lg font-semibold text-white">
+        {formatCurrency(booking.advancePayment.amount)}
+      </p>
+      <p className="font-[DM_Sans] text-xs text-white/40">Advance payment</p>
+    </div>
+    <div className="flex flex-col items-end gap-1">
+      <PaymentStatusBadge status={booking.advancePayment.status} />
+      {booking.advancePayment.paidAt && (
+        <span className="font-[DM_Sans] text-xs text-white/40">
+          Paid {formatDateTime(booking.advancePayment.paidAt)}
+        </span>
+      )}
+      {booking.advancePayment.status === "refunded" && booking.advancePayment.refundedAt && (
+        <span className="font-[DM_Sans] text-xs text-emerald-400">
+          Refunded {formatDateTime(booking.advancePayment.refundedAt)}
+        </span>
+      )}
+    </div>
+  </div>
+
+  {booking.advancePayment.status === "refund_due" && (
+    <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-amber-400/20 bg-amber-400/5 p-4">
+      <p className="font-[DM_Sans] text-sm text-amber-300">
+        Refund owed — ₹{booking.advancePayment.amount}
+      </p>
+      <button
+        onClick={handleMarkRefunded}
+        disabled={isMarkingRefunded}
+        className="rounded-lg bg-gradient-to-r from-blue-500 to-cyan-400 px-3 py-1.5 font-[DM_Sans] text-xs font-semibold text-white disabled:opacity-50"
+      >
+        {isMarkingRefunded ? "Processing…" : "Process Refund"}
+      </button>
+    </div>
+  )}
+</Card>
       </div>
     </div>
   );

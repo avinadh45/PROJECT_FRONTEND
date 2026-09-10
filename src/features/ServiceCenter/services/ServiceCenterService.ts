@@ -139,3 +139,8 @@ export const Getsubscription = async ()=>{
     const res = await axiosClient.get(API_ROUTES.SERVICE_CENTER.BOOKING_DETAILS(bookingId))
     return res.data.data
   }
+  export const markBookingRefunded = async(bookingId:string):Promise<ServiceCenterBookingDetail>=>{
+
+    const res = await axiosClient.patch(API_ROUTES.SERVICE_CENTER.MARK_REFUNDED(bookingId))
+    return res.data.data
+  }

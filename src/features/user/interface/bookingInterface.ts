@@ -126,5 +126,5 @@ export interface UserBookingDetail {
   } | null;
   proof: { imageUrl: string; uploadedBy: string; uploadedAt: string } | null;
   pickupLocation: { type: "Point"; coordinates: number[]; formatedAddress: string } | null;
-  advancePayment: { amount: number; status: "pending" | "paid" | "failed"; paidAt?: string };
+  advancePayment: { amount: number; status: "pending" | "paid" | "failed"|  "refund_due" | "refunded"; paidAt?: string; refundedAt?: string; };
 }

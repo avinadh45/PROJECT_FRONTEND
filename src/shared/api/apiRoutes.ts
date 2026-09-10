@@ -14,7 +14,8 @@ export const API_ROUTES = {
         if(search)params.set("search",search)
           return `/my-bookings?${params.toString()}`
     },
-    BOOKING_DETAILS:(bookingId:string)=>`/details/${bookingId}`
+    BOOKING_DETAILS:(bookingId:string)=>`/details/${bookingId}`,
+    CANCEL:(bookingId:string)=>`/booking/${bookingId}/cancel`
   },
   SERVICE_CENTER: {
     REGISTER: "/service-center/register",
@@ -40,7 +41,7 @@ export const API_ROUTES = {
         return `/service-center/bookings?${params.toString()}`
     },
     BOOKING_DETAILS:(bookingId:string)=>`/service-center/bookings/${bookingId}`,
-
+    MARK_REFUNDED:(bookingId:string)=>`/service-center/bookings/${bookingId}/mark-refunded`
     
   },
   MECHANIC: {

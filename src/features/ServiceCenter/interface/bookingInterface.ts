@@ -12,7 +12,7 @@ export interface BookingSummary {
   };
   mechanicName: string | null;
   status: string;
-  advancePaymentStatus: "pending" | "paid" | "failed";
+  advancePaymentStatus: "pending" | "paid" | "failed" | "refund_due" | "refunded";
 }
 
 export interface PaginatedBookings {
@@ -54,5 +54,10 @@ export interface ServiceCenterBookingDetail {
   } | null;
   proof: { imageUrl: string; uploadedBy: string; uploadedAt: string } | null;
   pickupLocation: { type: "Point"; coordinates: number[]; formatedAddress: string } | null;
-  advancePayment: { amount: number; status: "pending" | "paid" | "failed"; paidAt?: string };
+ advancePayment: {
+  amount: number;
+  status: "pending" | "paid" | "failed" | "refund_due" | "refunded";
+  paidAt?: string;
+  refundedAt?: string;
+};
 }

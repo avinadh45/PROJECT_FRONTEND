@@ -31,7 +31,7 @@ type BookingStatus =
   | "cancelled"
   | "failed_slot_unavailable";
 
-type PaymentStatus = "paid" | "pending" | "failed";
+  type PaymentStatus ="pending" | "paid" | "failed" | "refund_due" | "refunded";
 type VisitType = "drive-in" | "pickup-drop";
 
 interface AdvancePayment {
@@ -181,6 +181,14 @@ const PAYMENT_CONFIG: Record<PaymentStatus, { label: string; className: string }
   failed: {
     label: "Failed",
     className: "bg-red-400/10 text-red-300 border-red-400/20",
+  },
+  refund_due: {
+    label: "Refund Due",
+    className: "bg-amber-400/10 text-amber-300 border-amber-400/20",
+  },
+  refunded: {
+    label: "Refunded",
+    className: "bg-emerald-400/10 text-emerald-300 border-emerald-400/20",
   },
 };
 

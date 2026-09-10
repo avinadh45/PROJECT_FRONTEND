@@ -131,3 +131,9 @@ export const fetchUserBookingDetails = async(bookingId:string):Promise<UserBooki
   const res = await axiosClient.get(API_ROUTES.USER.BOOKING_DETAILS(bookingId))
   return res.data.data
 }
+
+export const cancelBooking = async(bookingId:string):Promise<UserBookingDetail>=>{
+
+  const res = await axiosClient.patch(API_ROUTES.USER.CANCEL(bookingId))
+  return res.data.data
+}
