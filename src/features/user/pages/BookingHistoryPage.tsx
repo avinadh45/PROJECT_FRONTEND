@@ -85,7 +85,7 @@ export default function BookingHistoryPage() {
   const { logoutuser} = useAuth()
   const { data, isLoading } = useMyBookings(page, PAGE_SIZE, statusFilter, search || undefined);
   const bookings = data?.data ?? [];
-  const total = data?.total ?? 0;
+  //const total = data?.total ?? 0;
   const totalPages = data?.totalPages ?? 1;
 
 

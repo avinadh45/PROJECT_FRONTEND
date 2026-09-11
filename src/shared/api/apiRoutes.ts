@@ -15,7 +15,8 @@ export const API_ROUTES = {
           return `/my-bookings?${params.toString()}`
     },
     BOOKING_DETAILS:(bookingId:string)=>`/details/${bookingId}`,
-    CANCEL:(bookingId:string)=>`/booking/${bookingId}/cancel`
+    CANCEL:(bookingId:string)=>`/booking/${bookingId}/cancel`,
+    RESCHEDULE:(bookingId:string)=>`/booking/${bookingId}/reschedule`
   },
   SERVICE_CENTER: {
     REGISTER: "/service-center/register",

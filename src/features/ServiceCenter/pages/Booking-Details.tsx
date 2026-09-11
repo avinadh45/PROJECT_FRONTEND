@@ -40,9 +40,17 @@ interface PaymentInfo {
    refundedAt?: string;
 }
 
-// ---------------------------------------------------------------------------
-// Status vocabulary — mapped exactly to backend values, no invented casing
-// ---------------------------------------------------------------------------
+interface ConfirmDialogProps {
+  open: boolean;
+  title: string;
+  description: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  isLoading?: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}
+
 
 const STATUS_META: Record<BookingStatus, { label: string; classes: string }> = {
   assigned: {
@@ -76,6 +84,43 @@ const COMPLETED_OR_LATER: BookingStatus[] = ["completed", "cancelled"];
 // ---------------------------------------------------------------------------
 // Formatting helpers
 // ---------------------------------------------------------------------------
+export function ConfirmDialog({
+  open,
+  title,
+  description,
+  confirmLabel = "Confirm",
+  cancelLabel = "Cancel",
+  isLoading = false,
+  onConfirm,
+  onCancel,
+}: ConfirmDialogProps) {
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+      <div className="w-full max-w-sm rounded-xl border border-white/10 bg-[#0a0f1e] p-6 shadow-2xl">
+        <h3 className="text-lg font-semibold text-white">{title}</h3>
+        <p className="mt-2 text-sm text-gray-400">{description}</p>
+        <div className="mt-6 flex justify-end gap-3">
+          <button
+            onClick={onCancel}
+            disabled={isLoading}
+            className="rounded-lg px-4 py-2 text-sm text-gray-300 hover:bg-white/5"
+          >
+            {cancelLabel}
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={isLoading}
+            className="rounded-lg bg-gradient-to-r from-blue-500 to-cyan-400 px-4 py-2 text-sm font-medium text-black disabled:opacity-50"
+          >
+            {isLoading ? "Processing..." : confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function formatDate(value?: string | null): string {
   if (!value) return "—";
@@ -260,25 +305,23 @@ export default function ServiceCenterBookingDetailsPage() {
   const { bookingId } = useParams<{ bookingId: string }>();
   const queryclient = useQueryClient()
   const [isMarkingRefunded, SetIsMarkingRefund] = useState(false)
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const navigate = useNavigate();
 
   async function handleMarkRefunded(){
-
-    const confirmed = window.confirm(
-    "Confirm you have already processed this refund via the Razorpay dashboard. This action cannot be undone."
-  );
-  if(confirmed){
     SetIsMarkingRefund(true)
     try {
       await markBookingRefunded(bookingId!)
       queryclient.invalidateQueries({queryKey:["service-center-booking-detail",bookingId]})
+      setIsConfirmOpen(false)
     } catch (err) {
       console.error("Failed to mark as refund",err);
     }finally{
       SetIsMarkingRefund(false)
     }
+
   }
-  }
+
   const { data: booking, isLoading, isError } = useServiceCenterBookingDetail(bookingId!);
 
   if (isLoading) {
@@ -472,7 +515,7 @@ return (
         Refund owed — ₹{booking.advancePayment.amount}
       </p>
       <button
-        onClick={handleMarkRefunded}
+        onClick={()=> setIsConfirmOpen(true)}
         disabled={isMarkingRefunded}
         className="rounded-lg bg-gradient-to-r from-blue-500 to-cyan-400 px-3 py-1.5 font-[DM_Sans] text-xs font-semibold text-white disabled:opacity-50"
       >
@@ -481,6 +524,15 @@ return (
     </div>
   )}
 </Card>
+<ConfirmDialog
+  open={isConfirmOpen}
+  title="Confirm refund"
+  description="Confirm you have already processed this refund via the Razorpay dashboard. This action cannot be undone."
+  confirmLabel="Mark as Refunded"
+  isLoading={isMarkingRefunded}
+  onConfirm={handleMarkRefunded}
+  onCancel={() => setIsConfirmOpen(false)}
+/>
       </div>
     </div>
   );

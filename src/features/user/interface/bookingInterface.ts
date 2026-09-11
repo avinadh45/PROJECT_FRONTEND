@@ -93,38 +93,44 @@ export interface PaginatedUserBookings {
   totalPages: number;
 }
 
-export interface UserBookingDetail {
-  id: string;
-  status: BookingStatus;
-  visitType: "drive-in" | "pickup-drop";
-  vehicleRegistrationNumber: string;
-  vehicleType: string;
-  vehicleBrand: string;
-  vehicleModel: string;
-  vehiclePhotoUrl: string | null;
-  categoryName: string;
-  garageName: string;
-  garagePhone: string;
-  garageEmail: string;
-  garageAddress: string | null;
-  mechanicName: string | null;
-  schedule: { date: string; slotStartingTime: string; slotEndingTime: string };
-  additionalInfo: string | null;
-  statusTimeline: { status: string; updatedBy: string; at: string }[];
-  job: {
-    reportedIssue: string;
-    estimatedTime: string;
-    estimatedCost: number;
-    description: {
-      jobItemsId: string;
-      issueFound: string;
-      spareParts: string;
-      sparePartQty: number;
+  export interface UserBookingDetail {
+    id: string;
+    status: BookingStatus;
+    visitType: "drive-in" | "pickup-drop";
+    vehicleRegistrationNumber: string;
+    vehicleType: string;
+    vehicleBrand: string;
+    vehicleModel: string;
+    vehiclePhotoUrl: string | null;
+    categoryName: string;
+    serviceCenterId: string;
+    garageName: string;
+    garagePhone: string;
+    garageEmail: string;
+    garageAddress: string | null;
+    mechanicName: string | null;
+    schedule: { date: string; slotStartingTime: string; slotEndingTime: string };
+    additionalInfo: string | null;
+    statusTimeline: { status: string; updatedBy: string; at: string }[];
+    job: {
+      reportedIssue: string;
       estimatedTime: string;
-      initalCost: number;
-    }[];
-  } | null;
-  proof: { imageUrl: string; uploadedBy: string; uploadedAt: string } | null;
-  pickupLocation: { type: "Point"; coordinates: number[]; formatedAddress: string } | null;
-  advancePayment: { amount: number; status: "pending" | "paid" | "failed"|  "refund_due" | "refunded"; paidAt?: string; refundedAt?: string; };
+      estimatedCost: number;
+      description: {
+        jobItemsId: string;
+        issueFound: string;
+        spareParts: string;
+        sparePartQty: number;
+        estimatedTime: string;
+        initalCost: number;
+      }[];
+    } | null;
+    proof: { imageUrl: string; uploadedBy: string; uploadedAt: string } | null;
+    pickupLocation: { type: "Point"; coordinates: number[]; formatedAddress: string } | null;
+    advancePayment: { amount: number; status: "pending" | "paid" | "failed"|  "refund_due" | "refunded"; paidAt?: string; refundedAt?: string; };
+  }
+export interface RescheduleBookingPayload {
+  date: string;
+  slotStartingTime: string;
+  slotEndingTime: string;
 }

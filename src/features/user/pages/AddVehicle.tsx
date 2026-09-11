@@ -347,7 +347,7 @@ function Footer() {
 /* ─── Main page ─────────────────────────────────────────────────────────── */
 export default function AddVehiclePage() {
   const navigate = useNavigate();
-  const { logoutuser,handleAddVehicle,loading:vehicleLoading,errors:vehicleErrors,setErrors: setVehicleErrors } = useAuth();
+  const { logoutuser,handleAddVehicle,loading:vehicleLoading,errors:vehicleErrors, } = useAuth();
   const fieldError = (key: string) => vehicleErrors[key]?.[0];
   const rcRef = useRef<HTMLInputElement>(null);
   const pucRef = useRef<HTMLInputElement>(null);

@@ -23,7 +23,7 @@ import type { UserBookingDetail } from "../interface/bookingInterface";
 import PickUpMapView from "../../../shared/components/PickUpMapView";
 import { useAuth } from "../hooks/useAuth";
 import { cancelBooking } from "../service/AuthService";
-import { QueryClient } from "@tanstack/react-query";
+
 import { useQueryClient } from "@tanstack/react-query";
 /* ------------------------------------------------------------------ */
 /*  NOTE: this Navbar renders fixed at the top (it sits over the page  */
