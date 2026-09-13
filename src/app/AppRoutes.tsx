@@ -7,7 +7,8 @@ import AdminProtectedRoute from './AdminProtectedRoute.tsx';
 import ServiceCenterLayout from "../features/ServiceCenter/layouts/ServiceCenterLayout.tsx";
 import AdminLayout from '../features/Admin/layout/adminLayout.tsx';
 import PageLoader from '../features/user/components/PageLoader.tsx'; 
-import RescheduleBookingPage from '../features/user/pages/RescheduleBookingPage.tsx';
+// import RescheduleBookingPage from '../features/user/pages/RescheduleBookingPage.tsx';
+
 
 // ── User ──────────────────────────────────────────────
 const Landingpage = lazy(() => import('../features/user/pages/Landingpage.tsx'));
@@ -26,6 +27,7 @@ const BookingConfirmation = lazy(()=> import ("../features/user/pages/BookingCon
 const BookingHistory = lazy(()=> import('../features/user/pages/BookingHistoryPage.tsx'))
 const UserBookingDetails = lazy(()=> import("../features/user/pages/BookingDetails.tsx"))
 const RescheduleBooking = lazy(()=> import("../features/user/pages/RescheduleBookingPage.tsx"))
+const RaiseConcernPage = lazy(()=> import("../features/user/pages/RaiseConcernPage.tsx"))
 
 // ── Service Center ────────────────────────────────────
 const ServiceCenterLogin = lazy(() => import("../features/ServiceCenter/pages/login.tsx"));
@@ -78,6 +80,10 @@ function AppRoutes() {
         <Route path = "/my-bookings" element={<UserProtectedRoute><BookingHistory/></UserProtectedRoute>}/>
         <Route path = "/details/:bookingId" element={<UserProtectedRoute><UserBookingDetails/></UserProtectedRoute>}/>
         <Route path='/booking/:bookingId/reschedule' element={<UserProtectedRoute><RescheduleBooking /></UserProtectedRoute>} />
+        <Route path='/booking/:bookingId/raise-concern' element={<UserProtectedRoute><RaiseConcernPage /></UserProtectedRoute>} />
+
+
+
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/service-center/login" element={<ServiceCenterLogin />} />

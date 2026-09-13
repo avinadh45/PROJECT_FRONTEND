@@ -139,5 +139,15 @@ export const API_ROUTES = {
     VERIFY_PAYMENT:"/booking/verify-payment",
     GET_BY_ID:(bookingId:string)=> `/booking/${bookingId}`,
     
+  },
+  CONCERN:{
+    CREATE:`/concern/create-concern`,
+    SERVICE_CENTER_LIST:(page:number,limit:number,status?:string)=>{
+      const params = new URLSearchParams({page:String(page),limit:String(limit)});
+      if(status) params.set("status",status)
+        return `/concern/concern-list?${params.toString()}`
+    },
+    SERVICE_CENTER_CONCERN_DETAIL:(concernId:string)=>`/concern/concern-detail/${concernId}`,
+    RESPOND:(concernId:string)=>`/concern/${concernId}/respond`
   }
 };

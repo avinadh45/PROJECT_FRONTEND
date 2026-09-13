@@ -220,7 +220,7 @@ export default function BookingHistoryPage() {
                       {isCompleted && (
                         <>
                           <button
-                            onClick={() => navigate(`/booking/${b.id}/concern`)}
+                            onClick={() => navigate(`/booking/${b.id}/raise-concern`)}
                             className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:border-white/25"
                           >
                             Raise Concern

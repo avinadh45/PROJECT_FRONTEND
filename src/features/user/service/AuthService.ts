@@ -8,6 +8,7 @@ import type {
 import type{ VehicleApiResponse,VehicleListApiResponse } from "../interface/vehicleIntraface";
 import { API_ROUTES } from "../../../shared/api/apiRoutes";
 import type { BookingConfirmation, BookingOrderPayload, BookingOrderResult, GarageFilter, PaginatedUserBookings, RescheduleBookingPayload, UserBookingDetail, VerifyPaymentPayload } from "../interface/bookingInterface";
+import type { ConcernDetail, ConcernSummary, PaginatedConcerns } from "../interface/concernInterface";
 
 export const Register = async (data: RegisterDTO): Promise<AuthResponse> => {
   const {...user} = data
@@ -141,5 +142,35 @@ export const cancelBooking = async(bookingId:string):Promise<UserBookingDetail>=
 export const rescheduleBooking = async(bookingId:string,payload:RescheduleBookingPayload):Promise<UserBookingDetail>=>{
 
   const res = await axiosClient.patch(API_ROUTES.USER.RESCHEDULE(bookingId),payload)
+  return res.data.data
+}
+
+export const createConcern = async(bookingId:string,issueTitle:string,description:string, 
+   imageFile?:File | null , videoFile?: File | null):Promise<ConcernSummary>=>{
+
+    const formData = new FormData()
+    formData.append("bookingId",bookingId);
+    formData.append("issueTitle",issueTitle);
+    formData.append("description",description);
+    
+     if (imageFile) formData.append("image", imageFile);
+  if (videoFile) formData.append("video", videoFile);
+
+  const res = await axiosClient.post(API_ROUTES.CONCERN.CREATE,formData)
+  return res.data.data
+   }
+   
+   export const fetchServiceCenterConcern = async( page:number,limit:number,status?:string):Promise<PaginatedConcerns>=>{
+    const res = await axiosClient.get(API_ROUTES.CONCERN.SERVICE_CENTER_LIST(page,limit,status))
+    return res.data.data
+   } 
+
+ export const fetchConcernDetail = async (concernId: string): Promise<ConcernDetail> => {
+  const res = await axiosClient.get(API_ROUTES.CONCERN.SERVICE_CENTER_CONCERN_DETAIL(concernId));
+  return res.data.data;
+};
+
+export const responceToConcern = async(concernId:string,rejected:boolean,rejectReason?: string):Promise<ConcernDetail>=>{
+  const res = await axiosClient.patch(API_ROUTES.CONCERN.RESPOND(concernId),{rejected,rejectReason})
   return res.data.data
 }

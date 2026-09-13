@@ -16,7 +16,7 @@ import {
   AlertTriangle,
   X,
 } from "lucide-react";
-// Reuse the existing shared header — do not rebuild it.
+
 import { Navbar } from "../components/Navbar";
 import { useUserBookingDetails } from "../hooks/useMyBookings";
 import type { UserBookingDetail } from "../interface/bookingInterface";
@@ -25,13 +25,6 @@ import { useAuth } from "../hooks/useAuth";
 import { cancelBooking } from "../service/AuthService";
 
 import { useQueryClient } from "@tanstack/react-query";
-/* ------------------------------------------------------------------ */
-/*  NOTE: this Navbar renders fixed at the top (it sits over the page  */
-/*  rather than pushing it down), so every page that uses it needs a   */
-/*  top offset on its content equal to the navbar's real height. If    */
-/*  your Navbar is ~72px tall, `pt-24` below is a safe match with some */
-/*  breathing room — adjust the value if your navbar is taller/shorter.*/
-/* ------------------------------------------------------------------ */
 
 const navLinks = [
   { label: "Home", href: "/dashboard" },
