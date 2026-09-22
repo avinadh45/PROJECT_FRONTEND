@@ -83,6 +83,7 @@ export interface UserBookingSummary {
   schedule: { date: string; slotStartingTime: string; slotEndingTime: string };
   status: string;
   advancePaymentStatus: "pending" | "paid" | "failed";
+  activeConcernId: string | null;
 }
 
 export interface PaginatedUserBookings {

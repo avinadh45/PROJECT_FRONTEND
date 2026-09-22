@@ -28,6 +28,9 @@ const BookingHistory = lazy(()=> import('../features/user/pages/BookingHistoryPa
 const UserBookingDetails = lazy(()=> import("../features/user/pages/BookingDetails.tsx"))
 const RescheduleBooking = lazy(()=> import("../features/user/pages/RescheduleBookingPage.tsx"))
 const RaiseConcernPage = lazy(()=> import("../features/user/pages/RaiseConcernPage.tsx"))
+const ScheduleConcernVisit = lazy(()=>import('../features/user/pages/ScheduleConcernVisitPage.tsx'))
+const ConcernDetailsPage = lazy(()=> import ("../features/user/pages/ConcernDetails.tsx"))
+const BookingChatPage = lazy(()=> import("../features/user/pages/BookingChatPage.tsx"))
 
 // ── Service Center ────────────────────────────────────
 const ServiceCenterLogin = lazy(() => import("../features/ServiceCenter/pages/login.tsx"));
@@ -43,6 +46,9 @@ const SubscriptionPage = lazy(()=> import("../features/ServiceCenter/pages/Subsc
 const Slot = lazy(()=> import('../features/ServiceCenter/pages/Slot.tsx'))
 const Bookings = lazy(()=> import("../features/ServiceCenter/pages/Booking.tsx"))
 const BookingDetails = lazy(()=> import('../features/ServiceCenter/pages/Booking-Details.tsx'))
+const ConcernList = lazy(()=> import('../features/ServiceCenter/pages/ConcernList.tsx'))
+const ConcernDetails = lazy(()=> import("../features/ServiceCenter/pages/ConcernDetails.tsx"))
+
 
 // ── Mechanic ──────────────────────────────────────────
 const MechanicLogin = lazy(() => import('../features/Mechanic/pages/login.tsx'));
@@ -61,6 +67,7 @@ const EditCategory = lazy(() => import("../features/Admin/pages/EditCategory.tsx
 const GarageVerificationPage = lazy(() => import('../features/Admin/pages/GarageVerification.tsx'));
 const VerificationDetails = lazy(() => import("../features/Admin/pages/verificationDetails"));
 const Subscription  = lazy(()=> import("../features/Admin/pages/Subscription.tsx"))
+
 
 function AppRoutes() {
   return (
@@ -81,7 +88,9 @@ function AppRoutes() {
         <Route path = "/details/:bookingId" element={<UserProtectedRoute><UserBookingDetails/></UserProtectedRoute>}/>
         <Route path='/booking/:bookingId/reschedule' element={<UserProtectedRoute><RescheduleBooking /></UserProtectedRoute>} />
         <Route path='/booking/:bookingId/raise-concern' element={<UserProtectedRoute><RaiseConcernPage /></UserProtectedRoute>} />
-
+        <Route path='/concern/:concernId/schedule' element={<UserProtectedRoute><ScheduleConcernVisit /></UserProtectedRoute>} />
+        <Route path='/concerns/:concernId'element={<UserProtectedRoute><ConcernDetailsPage /></UserProtectedRoute>} />
+      <  Route path='/booking/:bookingId/chat' element={<UserProtectedRoute><BookingChatPage/></UserProtectedRoute>}/>
 
 
         <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -93,10 +102,13 @@ function AppRoutes() {
         <Route path='/service-center/verification-status' element={<VerificationStatusPage />} />
         <Route path='/service-center/application' element={<EditRegister />} />
         <Route path="/service-center" element={<ServiceCenterProtectedRoute><ServiceCenterLayout /></ServiceCenterProtectedRoute>}>
+
           <Route path="dashboard" element={<ServiceCenterDashboard />} />
           <Route path="mechanic" element={<ServiceCenterMechanic />} />
           <Route path='bookings' element={<Bookings/>}/>
         <Route path='/service-center/bookings/:bookingId' element={<BookingDetails/>}/>
+        <Route path='concern' element={<ConcernList/>}/>
+        <Route path='/service-center/concern/concern-detail/:concernId' element={<ConcernDetails/>}/>
           <Route path='service' element={<Service/>}/>
           <Route path='subscription' element={<SubscriptionPage/>}/>
           <Route path='slot' element={<Slot/>}/>

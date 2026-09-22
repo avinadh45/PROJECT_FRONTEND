@@ -21,7 +21,6 @@ export interface PaginatedConcerns {
   limit: number;
   totalPages: number;
 }
-
 export interface ConcernDetail {
   id: string;
   bookingId: string;
@@ -34,26 +33,6 @@ export interface ConcernDetail {
   categoryName: string;
   customerName: string;
   customerPhone: string;
-  originalServiceDate: string;
-  timeline: { status: string; updatedBy: string; at: string }[];
-  createdAt: string;
-}
-export interface UserConcernDetail {
-  id: string;
-  bookingId: string;
-  serviceCenterId: string;
-  issueTitle: string;
-  description: string;
-  proof: { imageUrl?: string; videoUrl?: string }[];
-  status: "pending" | "approved" | "rejected" | "scheduled" | "resolved";
-  providerResponse?: { rejected: boolean; rejectReason?: string; respondedAt?: string };
-  resolutionBookingId?: string;
-  vehicleRegistrationNumber: string;
-  vehicleBrand: string;
-  vehicleModel: string;
-  vehiclePhotoUrl: string | null;
-  categoryName: string;
-  garageName: string;
   originalServiceDate: string;
   timeline: { status: string; updatedBy: string; at: string }[];
   createdAt: string;

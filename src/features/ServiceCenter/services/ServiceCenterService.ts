@@ -9,6 +9,7 @@ import type {
 } from "../interface/serviceCenter";
 import type { Subscription } from "../types/subscription";
 import type { PaginatedBookings, ServiceCenterBookingDetail } from "../interface/bookingInterface";
+import type { ConcernDetail,  PaginatedConcerns } from '../interface/concernInterface';
 // import type { AvailabilityFormDat } from "../types/slot";
 
 export const registerServicCenter = async (
@@ -144,3 +145,17 @@ export const Getsubscription = async ()=>{
     const res = await axiosClient.patch(API_ROUTES.SERVICE_CENTER.MARK_REFUNDED(bookingId))
     return res.data.data
   }
+  export const fetchServiceCenterConcern = async( page:number,limit:number,status?:string):Promise<PaginatedConcerns>=>{
+    const res = await axiosClient.get(API_ROUTES.CONCERN.SERVICE_CENTER_LIST(page,limit,status))
+    return res.data.data
+   } 
+
+ export const fetchConcernDetail = async (concernId: string): Promise<ConcernDetail> => {
+  const res = await axiosClient.get(API_ROUTES.CONCERN.SERVICE_CENTER_CONCERN_DETAIL(concernId));
+  return res.data.data;
+};
+
+export const responceToConcern = async(concernId:string,rejected:boolean,rejectReason?: string):Promise<ConcernDetail>=>{
+  const res = await axiosClient.patch(API_ROUTES.CONCERN.RESPOND(concernId),{rejected,rejectReason})
+  return res.data.data
+}

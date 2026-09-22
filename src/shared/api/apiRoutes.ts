@@ -8,6 +8,7 @@ export const API_ROUTES = {
     RESET_PASSWORD: "/reset-password",
     GOOGLE_LOGIN: "/google-login",
     LOGOUT: "/logout",
+    ME:"/me",
     MY_BOOKING:(page:number,limit:number,status?:string,search?:string)=>{
       const params = new URLSearchParams({page:String(page),limit:String(limit)})
       if(status)params.set("status",status)
@@ -16,7 +17,8 @@ export const API_ROUTES = {
     },
     BOOKING_DETAILS:(bookingId:string)=>`/details/${bookingId}`,
     CANCEL:(bookingId:string)=>`/booking/${bookingId}/cancel`,
-    RESCHEDULE:(bookingId:string)=>`/booking/${bookingId}/reschedule`
+    RESCHEDULE:(bookingId:string)=>`/booking/${bookingId}/reschedule`,
+    USER_CONCERN_DETAIL:(concernId:string)=> `/concern/${concernId}`
   },
   SERVICE_CENTER: {
     REGISTER: "/service-center/register",
@@ -148,6 +150,11 @@ export const API_ROUTES = {
         return `/concern/concern-list?${params.toString()}`
     },
     SERVICE_CENTER_CONCERN_DETAIL:(concernId:string)=>`/concern/concern-detail/${concernId}`,
-    RESPOND:(concernId:string)=>`/concern/${concernId}/respond`
+    RESPOND:(concernId:string)=>`/concern/${concernId}/respond`,
+    SCHEDULE: (concernId: string) => `/concern/${concernId}/schedule`,
+  },
+
+  CHAT:{
+    _CHAT:(conversationId:string)=>`/chat/${conversationId}/messages`
   }
 };

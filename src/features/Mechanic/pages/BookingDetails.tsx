@@ -13,7 +13,8 @@ import {
   Car,
   Camera,
   X,
-  MapPin
+  MapPin,
+  MessageCircle,
 } from "lucide-react";
 import  PickUpMapView from "../../../shared/components/PickUpMapView"
 import { useMechanicBookingDetails } from "../hooks/useMechanicBookingDetail";
@@ -245,6 +246,10 @@ export default function MechanicJobCardPage() {
   const existingProofUrl =  booking?.proof?.imageUrl
   const existingProofUploadedAt = booking?.proof?.uploadedAt
 
+  function handleChat() {
+    navigate(`/mechanic/bookings/${bookingId}/chat`);
+  }
+
   async function handleSaveJobCard() {
     setIsSavingItems(true);
     setProofError(null);
@@ -322,12 +327,21 @@ async function handleUpdateStatus() {
             </div>
           </div>
 
-          <span
-            className={`inline-flex shrink-0 items-center gap-2 rounded-full px-3 py-1.5 font-dm-sans text-xs font-medium ring-1 ${statusStyle.bg} ${statusStyle.text} ${statusStyle.ring}`}
-          >
-            <span className={`h-1.5 w-1.5 rounded-full ${statusStyle.dot}`} />
-            {status}
-          </span>
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              onClick={handleChat}
+              aria-label="Chat with customer"
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-[#0a0f1e] text-white/70 transition hover:border-white/20 hover:text-cyan-300"
+            >
+              <MessageCircle className="h-4 w-4" />
+            </button>
+            <span
+              className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 font-dm-sans text-xs font-medium ring-1 ${statusStyle.bg} ${statusStyle.text} ${statusStyle.ring}`}
+            >
+              <span className={`h-1.5 w-1.5 rounded-full ${statusStyle.dot}`} />
+              {status}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -378,6 +392,14 @@ async function handleUpdateStatus() {
                       {booking.schedule.slotStartingTime}
                     </div>
                   </div>
+
+                  <button
+                    onClick={handleChat}
+                    className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 font-dm-sans text-sm font-medium text-white/70 transition hover:border-white/20 hover:text-white"
+                  >
+                    <MessageCircle className="h-3.5 w-3.5" />
+                    Chat with Customer
+                  </button>
                 </div>
               </div>
             </SectionCard>

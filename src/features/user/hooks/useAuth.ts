@@ -4,6 +4,7 @@ import type {
   RegisterDTO,
   VerifyOtpDTO,
   LoginDTO,
+  AuthUser,
 } from "../interface/authinterface";
 import {
   Register,
@@ -30,6 +31,7 @@ export function useAuth() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [success, setSuccess] = useState<string | null>(null);
  const [vehicles, setVehicles] = useState<VehicleResponse[]>([]);
+ const [user, setUser] = useState<AuthUser | null>(null);
 
   const clearMessages = () => {
     setErrors({});
@@ -88,6 +90,12 @@ export function useAuth() {
         setErrors({general:user.message});
         return;
       }
+      setUser({
+      id: user.data.user._id,
+      name: user.data.user.name,
+      email: user.data.user.email,
+      role: user.data.user.role,
+    });
       navigate("/dashboard");
       return user;
     } catch (err: any) {
@@ -204,12 +212,28 @@ const fetchVehicle = async()=>{
     setLoading(false)
   }
 } 
+const fetchMe = async()=>{
+
+  try {
+    const res = await axiosClient.get(API_ROUTES.USER.ME)
+   setUser({
+      id: res.data.data._id,
+      name: res.data.data.name,
+      email: res.data.data.email,
+      role: res.data.data.role,
+    });
+  } catch{
+    setUser(null)
+  }
+}
 
   return {
     errors,
     loading,
     vehicles,
     success,
+    user,
+    fetchMe,
     setErrors,
     handleApiError,
     setSuccess,

@@ -8,7 +8,7 @@ import type {
 import type{ VehicleApiResponse,VehicleListApiResponse } from "../interface/vehicleIntraface";
 import { API_ROUTES } from "../../../shared/api/apiRoutes";
 import type { BookingConfirmation, BookingOrderPayload, BookingOrderResult, GarageFilter, PaginatedUserBookings, RescheduleBookingPayload, UserBookingDetail, VerifyPaymentPayload } from "../interface/bookingInterface";
-import type { ConcernDetail, ConcernSummary, PaginatedConcerns } from "../interface/concernInterface";
+import type {  ConcernDetail, ConcernSummary, UserConcernDetail, } from "../interface/concernInterface";
 
 export const Register = async (data: RegisterDTO): Promise<AuthResponse> => {
   const {...user} = data
@@ -160,17 +160,14 @@ export const createConcern = async(bookingId:string,issueTitle:string,descriptio
   return res.data.data
    }
    
-   export const fetchServiceCenterConcern = async( page:number,limit:number,status?:string):Promise<PaginatedConcerns>=>{
-    const res = await axiosClient.get(API_ROUTES.CONCERN.SERVICE_CENTER_LIST(page,limit,status))
+  export const scheduleConcernVisit = async(concenId:string,date:string,slotStartingTime:string,slotEndingTime:string):Promise<ConcernDetail>=>{
+
+    const res = await axiosClient.patch(API_ROUTES.CONCERN.SCHEDULE(concenId),{date, slotStartingTime, slotEndingTime})
     return res.data.data
-   } 
+  } 
 
- export const fetchConcernDetail = async (concernId: string): Promise<ConcernDetail> => {
-  const res = await axiosClient.get(API_ROUTES.CONCERN.SERVICE_CENTER_CONCERN_DETAIL(concernId));
-  return res.data.data;
-};
+  export const fetchUserConcernDetail = async(concernId:string):Promise<UserConcernDetail>=>{
 
-export const responceToConcern = async(concernId:string,rejected:boolean,rejectReason?: string):Promise<ConcernDetail>=>{
-  const res = await axiosClient.patch(API_ROUTES.CONCERN.RESPOND(concernId),{rejected,rejectReason})
-  return res.data.data
-}
+    const res = await axiosClient.get(API_ROUTES.USER.USER_CONCERN_DETAIL(concernId))
+    return res.data.data
+  }

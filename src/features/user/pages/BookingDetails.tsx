@@ -15,6 +15,7 @@ import {
   StickyNote,
   AlertTriangle,
   X,
+  MessageCircle,
 } from "lucide-react";
 
 import { Navbar } from "../components/Navbar";
@@ -502,11 +503,13 @@ function SummarySidebar({
   onReschedule,
   onCancel,
   onBookAgain,
+  onChat,
 }: {
   booking: UserBookingDetail;
   onReschedule: () => void;
   onCancel: () => void;
   onBookAgain: () => void;
+  onChat: () => void;
 }) {
   const { status } = booking;
 
@@ -555,6 +558,18 @@ function SummarySidebar({
 
       <Card>
         <SectionTitle>Actions</SectionTitle>
+
+        {/* Chat is available regardless of booking status — even after
+            completion or cancellation, a customer may still need to
+            reach the garage (e.g. to ask about a refund or a follow-up). */}
+        <button
+          onClick={onChat}
+          className="mb-3 flex w-full items-center justify-center gap-2 rounded-xl border border-white/20 py-2.5 text-sm font-semibold text-white/80 transition-colors hover:bg-white/5"
+        >
+          <MessageCircle className="h-4 w-4" />
+          Chat with Garage
+        </button>
+
         <ActionButtons
           status={status}
           onReschedule={onReschedule}
@@ -637,6 +652,10 @@ export default function BookingDetailsPage() {
 
   const handleReschedule = () => {
     navigate(`/booking/${bookingId}/reschedule`);
+  };
+
+  const handleChat = () => {
+    navigate(`/booking/${bookingId}/chat`);
   };
 
   const handleCancel = async () => {
@@ -760,6 +779,7 @@ export default function BookingDetailsPage() {
                   onReschedule={handleReschedule}
                   onCancel={() => setCancelModalOpen(true)}
                   onBookAgain={handleBookAgain}
+                  onChat={handleChat}
                 />
               </div>
             </div>

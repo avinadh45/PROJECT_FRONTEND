@@ -31,24 +31,41 @@ const navLinks = [
   { label: "Add Vehicle", href: "/add-vehicle" },
   { label: "My Vehicle", href: "/my-vehicle" },
   { label: "Repair", href: "/booking" },
-  { label: "History", href: "/history" },
+  { label: "History", href: "/my-bookings" },
 ];
 
 // Maps a booking status to a badge style + display label.
 // Adjust the keys here if your backend's status vocabulary differs.
 const STATUS_STYLES: Record<string, { label: string; className: string }> = {
-  completed: { label: "Completed", className: "bg-emerald-500/15 text-emerald-400" },
-  "in-progress": { label: "Ongoing", className: "bg-cyan-500/15 text-cyan-400" },
+  completed: {
+    label: "Completed",
+    className: "bg-emerald-500/15 text-emerald-400",
+  },
+  "in-progress": {
+    label: "Ongoing",
+    className: "bg-cyan-500/15 text-cyan-400",
+  },
   confirmed: { label: "Upcoming", className: "bg-blue-500/15 text-blue-400" },
-  pending_payment: { label: "Payment Pending", className: "bg-orange-500/15 text-orange-400" },
+  pending_payment: {
+    label: "Payment Pending",
+    className: "bg-orange-500/15 text-orange-400",
+  },
   cancelled: { label: "Cancelled", className: "bg-red-500/15 text-red-400" },
-  failed_slot_unavailable: { label: "Slot Unavailable", className: "bg-red-500/15 text-red-400" },
+  failed_slot_unavailable: {
+    label: "Slot Unavailable",
+    className: "bg-red-500/15 text-red-400",
+  },
 };
 
 function StatusBadge({ status }: { status: string }) {
-  const style = STATUS_STYLES[status] ?? { label: status, className: "bg-slate-500/15 text-slate-400" };
+  const style = STATUS_STYLES[status] ?? {
+    label: status,
+    className: "bg-slate-500/15 text-slate-400",
+  };
   return (
-    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${style.className}`}>
+    <span
+      className={`rounded-full px-3 py-1 text-xs font-semibold ${style.className}`}
+    >
       {style.label}
     </span>
   );
@@ -69,7 +86,9 @@ function InfoItem({
         <Icon size={15} />
       </div>
       <div>
-        <p className="text-[10px] uppercase tracking-wide text-slate-500">{label}</p>
+        <p className="text-[10px] uppercase tracking-wide text-slate-500">
+          {label}
+        </p>
         <p className="text-sm text-white">{value}</p>
       </div>
     </div>
@@ -80,16 +99,21 @@ export default function BookingHistoryPage() {
   const navigate = useNavigate();
   //const [isCancelling, setIsCancelling] = useState(false);
   const [page, setPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
+  const [statusFilter, setStatusFilter] = useState<string | undefined>(
+    undefined,
+  );
   const [search, setSearch] = useState("");
-  const { logoutuser} = useAuth()
-  const { data, isLoading } = useMyBookings(page, PAGE_SIZE, statusFilter, search || undefined);
+  const { logoutuser } = useAuth();
+  const { data, isLoading } = useMyBookings(
+    page,
+    PAGE_SIZE,
+    statusFilter,
+    search || undefined,
+  );
   const bookings = data?.data ?? [];
   //const total = data?.total ?? 0;
   const totalPages = data?.totalPages ?? 1;
 
-
-  
   const pageNumbers = (): (number | "...")[] => {
     if (totalPages <= MAX_PAGE_BUTTONS + 2) {
       return Array.from({ length: totalPages }, (_, i) => i + 1);
@@ -106,13 +130,26 @@ export default function BookingHistoryPage() {
 
   return (
     <div className="min-h-screen w-full" style={{ background: "#060a14" }}>
-      <Navbar links={navLinks} userInitials="AK" userName="Arun Kumar" userEmail="arun@email.com" notifications={[]} onLogout={logoutuser} />
+      <Navbar
+        links={navLinks}
+        userInitials="AK"
+        userName="Arun Kumar"
+        userEmail="arun@email.com"
+        notifications={[]}
+        onLogout={logoutuser}
+      />
 
       <div className="mx-auto max-w-5xl px-6 py-8">
-        <h1 className="text-2xl text-white" style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700 }}>
+        <h1
+          className="text-2xl text-white"
+          style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700 }}
+        >
           Booking History
         </h1>
-        <p className="mt-1 text-sm text-slate-400" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+        <p
+          className="mt-1 text-sm text-slate-400"
+          style={{ fontFamily: "'DM Sans', sans-serif" }}
+        >
           View and manage your service bookings.
         </p>
 
@@ -150,111 +187,163 @@ export default function BookingHistoryPage() {
         <div className="mt-6 flex flex-col gap-4">
           {isLoading && <p className="text-slate-500">Loading…</p>}
           {!isLoading && bookings.length === 0 && (
-            <p className="text-slate-500 py-10 text-center">No bookings found.</p>
+            <p className="text-slate-500 py-10 text-center">
+              No bookings found.
+            </p>
           )}
 
           {bookings.map((b: any) => {
-            const isCompleted = b.status === "completed";
-            const isPendingPayment = b.status === "pending_payment";
-            const isOngoing = b.status === "in-progress";
+  const isCompleted = b.status === "completed";
+  const isPendingPayment = b.status === "pending_payment";
+  const isOngoing = b.status === "in-progress";
 
-            return (
-              <div
-                key={b.id}
-                className="flex gap-4 rounded-2xl border border-white/10 bg-[#0a0f1e] p-4"
-              >
-                {/* Vehicle image — falls back to an icon tile if the API doesn't return one */}
-                <div className="h-[104px] w-[120px] shrink-0 overflow-hidden rounded-xl bg-white/5">
-                  {b.vehiclePhotoUrl ? (
-                    <img
-                      src={b.vehiclePhotoUrl}
-                      alt={b.vehicleRegistrationNumber}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-slate-600">
-                      <Car size={28} />
-                    </div>
-                  )}
-                </div>
+  return (
+    <div
+      key={b.id}
+      className="rounded-2xl border border-white/10 bg-[#0a0f1e] p-4"
+    >
+      <div className="flex gap-4">
+        {/* existing vehicle image + info block — UNCHANGED */}
+        <div className="h-[104px] w-[120px] shrink-0 overflow-hidden rounded-xl bg-white/5">
+          {b.vehiclePhotoUrl ? (
+            <img
+              src={b.vehiclePhotoUrl}
+              alt={b.vehicleRegistrationNumber}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-slate-600">
+              <Car size={28} />
+            </div>
+          )}
+        </div>
 
-                <div className="flex flex-1 flex-col justify-between">
-                  <div>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <p className="text-base font-semibold text-white">
-                          {b.vehicleModel ?? b.vehicleRegistrationNumber}
-                        </p>
-                        <p className="text-xs text-slate-500">{b.vehicleRegistrationNumber}</p>
-                      </div>
-                      <StatusBadge status={b.status} />
-                    </div>
-
-                    <div className="mt-3 flex flex-wrap gap-x-8 gap-y-3">
-                      <InfoItem icon={Warehouse} label="Garage" value={b.garageName} />
-                      <InfoItem icon={Wrench} label="Service" value={b.categoryName} />
-                      {isOngoing && b.estimatedCompletion ? (
-                        <InfoItem icon={Clock} label="Est. Completion" value={b.estimatedCompletion} />
-                      ) : (
-                        <InfoItem
-                          icon={Calendar}
-                          label="Date & Time"
-                          value={`${b.schedule?.date} · ${b.schedule?.slotStartingTime}`}
-                        />
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="mt-3 flex items-center justify-between">
-                    {isCompleted && b.invoiceNumber ? (
-                      <span className="text-xs text-slate-600">Invoice No: #{b.invoiceNumber}</span>
-                    ) : isPendingPayment && b.advancePayment ? (
-                      <span className="text-sm font-semibold text-cyan-400">
-                        Total: ₹{b.advancePayment}
-                      </span>
-                    ) : (
-                      <span className="text-xs text-slate-600">{b.visitType}</span>
-                    )}
-
-                    <div className="flex gap-2">
-                      {isCompleted && (
-                        <>
-                          <button
-                            onClick={() => navigate(`/booking/${b.id}/raise-concern`)}
-                            className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:border-white/25"
-                          >
-                            Raise Concern
-                          </button>
-                          {b.invoiceNumber && (
-                            <button
-                              onClick={() => navigate(`/booking/${b.id}/invoice`)}
-                              className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:border-white/25"
-                            >
-                              Download Invoice
-                            </button>
-                          )}
-                        </>
-                      )}
-                      <button
-                        onClick={() => navigate(`/details/${b.id}`)}
-                        className="rounded-lg bg-cyan-500 px-3 py-1.5 text-xs font-semibold text-black hover:bg-cyan-400"
-                      >
-                        View Details
-                      </button>
-                      {isPendingPayment && (
-                        <button
-                          onClick={() => navigate(`/booking/${b.id}/pay`)}
-                          className="rounded-lg bg-cyan-500 px-3 py-1.5 text-xs font-semibold text-black hover:bg-cyan-400"
-                        >
-                          Pay Now
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
+        <div className="flex flex-1 flex-col justify-between">
+          <div>
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-base font-semibold text-white">
+                  {b.vehicleModel ?? b.vehicleRegistrationNumber}
+                </p>
+                <p className="text-xs text-slate-500">
+                  {b.vehicleRegistrationNumber}
+                </p>
               </div>
-            );
-          })}
+              <StatusBadge status={b.status} />
+            </div>
+
+            <div className="mt-3 flex flex-wrap gap-x-8 gap-y-3">
+              <InfoItem icon={Warehouse} label="Garage" value={b.garageName} />
+              <InfoItem icon={Wrench} label="Service" value={b.categoryName} />
+              {isOngoing && b.estimatedCompletion ? (
+                <InfoItem
+                  icon={Clock}
+                  label="Est. Completion"
+                  value={b.estimatedCompletion}
+                />
+              ) : (
+                <InfoItem
+                  icon={Calendar}
+                  label="Date & Time"
+                  value={`${b.schedule?.date} · ${b.schedule?.slotStartingTime}`}
+                />
+              )}
+            </div>
+          </div>
+
+          <div className="mt-3 flex items-center justify-between">
+            {isCompleted && b.invoiceNumber ? (
+              <span className="text-xs text-slate-600">
+                Invoice No: #{b.invoiceNumber}
+              </span>
+            ) : isPendingPayment && b.advancePayment ? (
+              <span className="text-sm font-semibold text-cyan-400">
+                Total: ₹{b.advancePayment}
+              </span>
+            ) : (
+              <span className="text-xs text-slate-600">{b.visitType}</span>
+            )}
+
+            <div className="flex gap-2">
+              {isCompleted && (
+                <>
+                  {!b.concernId && (
+                    <button
+                      onClick={() => navigate(`/booking/${b.id}/raise-concern`)}
+                      className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:border-white/25"
+                    >
+                      Raise Concern
+                    </button>
+                  )}
+                  {b.invoiceNumber && (
+                    <button
+                      onClick={() => navigate(`/booking/${b.id}/invoice`)}
+                      className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:border-white/25"
+                    >
+                      Download Invoice
+                    </button>
+                  )}
+                </>
+              )}
+              <button
+                onClick={() => navigate(`/details/${b.id}`)}
+                className="rounded-lg bg-cyan-500 px-3 py-1.5 text-xs font-semibold text-black hover:bg-cyan-400"
+              >
+                View Details
+              </button>
+              {isPendingPayment && (
+                <button
+                  onClick={() => navigate(`/booking/${b.id}/pay`)}
+                  className="rounded-lg bg-cyan-500 px-3 py-1.5 text-xs font-semibold text-black hover:bg-cyan-400"
+                >
+                  Pay Now
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* NEW — nested concern + follow-up section, only renders if a concern exists */}
+      {b.concernId && (
+        <div className="mt-4 border-t border-white/5 pt-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-amber-300">
+              A concern was raised for this visit
+            </span>
+            <button
+              onClick={() => navigate(`/concerns/${b.concernId}`)}
+              className="rounded-lg border border-cyan-400/30 px-3 py-1 text-xs font-semibold text-cyan-300 hover:border-cyan-400/50"
+            >
+              View Concern
+            </button>
+          </div>
+
+          {b.followUpVisits?.length > 0 && (
+            <div className="mt-2 flex flex-col gap-2">
+              {b.followUpVisits.map((fv: any) => (
+                <div
+                  key={fv.id}
+                  className="flex items-center justify-between rounded-lg bg-white/[0.02] px-3 py-2"
+                >
+                  <span className="text-xs text-slate-400">
+                    Follow-up visit · {fv.schedule.date} · {fv.status}
+                  </span>
+                  <button
+                    onClick={() => navigate(`/details/${fv.id}`)}
+                    className="rounded-lg bg-cyan-500 px-3 py-1 text-xs font-semibold text-black hover:bg-cyan-400"
+                  >
+                    View
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+})}
         </div>
 
         {totalPages > 1 && (
@@ -284,7 +373,7 @@ export default function BookingHistoryPage() {
                 >
                   {p}
                 </button>
-              )
+              ),
             )}
 
             <button

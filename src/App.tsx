@@ -1,10 +1,17 @@
+
 import AppRoutes from "./app/AppRoutes";
+import { AuthProvider } from "./features/user/context/AuthContext";
 
 function App() {
   // const authProps = useAuth();
   // const adminAuthProps = useAdminAuth();
+
   
-  return < AppRoutes/>
+  return(
+    <AuthProvider>
+     < AppRoutes/>
+     </AuthProvider>
+      )
   
 }
 
