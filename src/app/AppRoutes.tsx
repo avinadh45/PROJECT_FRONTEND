@@ -7,7 +7,6 @@ import AdminProtectedRoute from './AdminProtectedRoute.tsx';
 import ServiceCenterLayout from "../features/ServiceCenter/layouts/ServiceCenterLayout.tsx";
 import AdminLayout from '../features/Admin/layout/adminLayout.tsx';
 import PageLoader from '../features/user/components/PageLoader.tsx'; 
-// import RescheduleBookingPage from '../features/user/pages/RescheduleBookingPage.tsx';
 
 
 // ── User ──────────────────────────────────────────────
@@ -31,6 +30,7 @@ const RaiseConcernPage = lazy(()=> import("../features/user/pages/RaiseConcernPa
 const ScheduleConcernVisit = lazy(()=>import('../features/user/pages/ScheduleConcernVisitPage.tsx'))
 const ConcernDetailsPage = lazy(()=> import ("../features/user/pages/ConcernDetails.tsx"))
 const BookingChatPage = lazy(()=> import("../features/user/pages/BookingChatPage.tsx"))
+const ConcernChatPage = lazy(()=> import("../features/user/pages/ConcernChatPage.tsx"))
 
 // ── Service Center ────────────────────────────────────
 const ServiceCenterLogin = lazy(() => import("../features/ServiceCenter/pages/login.tsx"));
@@ -48,12 +48,14 @@ const Bookings = lazy(()=> import("../features/ServiceCenter/pages/Booking.tsx")
 const BookingDetails = lazy(()=> import('../features/ServiceCenter/pages/Booking-Details.tsx'))
 const ConcernList = lazy(()=> import('../features/ServiceCenter/pages/ConcernList.tsx'))
 const ConcernDetails = lazy(()=> import("../features/ServiceCenter/pages/ConcernDetails.tsx"))
+const ServiceCenterConcernChatPage = lazy(()=> import("../features/ServiceCenter/pages/ServiceCenterConcernChatPage.tsx"))
 
 
 // ── Mechanic ──────────────────────────────────────────
 const MechanicLogin = lazy(() => import('../features/Mechanic/pages/login.tsx'));
 const MechanicBashboard = lazy(() => import("../features/Mechanic/pages/Dahboard.tsx"));
 const MechanicBookingDetails = lazy(()=> import("../features/Mechanic/pages/BookingDetails.tsx"))
+const MechanicChatPage = lazy(()=> import("../features/Mechanic/pages/MechanicChatPage.tsx"))
 
 // ── Admin ─────────────────────────────────────────────
 const AdminLogin = lazy(() => import('../features/Admin/pages/Login.tsx'));
@@ -90,7 +92,8 @@ function AppRoutes() {
         <Route path='/booking/:bookingId/raise-concern' element={<UserProtectedRoute><RaiseConcernPage /></UserProtectedRoute>} />
         <Route path='/concern/:concernId/schedule' element={<UserProtectedRoute><ScheduleConcernVisit /></UserProtectedRoute>} />
         <Route path='/concerns/:concernId'element={<UserProtectedRoute><ConcernDetailsPage /></UserProtectedRoute>} />
-      <  Route path='/booking/:bookingId/chat' element={<UserProtectedRoute><BookingChatPage/></UserProtectedRoute>}/>
+        <Route path='/booking/:bookingId/chat' element={<UserProtectedRoute><BookingChatPage/></UserProtectedRoute>}/>
+        <Route path='/concerns/:concernId/chat' element={<UserProtectedRoute><ConcernChatPage/></UserProtectedRoute>}/>
 
 
         <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -102,6 +105,7 @@ function AppRoutes() {
         <Route path='/service-center/verification-status' element={<VerificationStatusPage />} />
         <Route path='/service-center/application' element={<EditRegister />} />
         <Route path="/service-center" element={<ServiceCenterProtectedRoute><ServiceCenterLayout /></ServiceCenterProtectedRoute>}>
+        <Route path='/service-center/chat/:concernId' element={<ServiceCenterProtectedRoute><ServiceCenterConcernChatPage/></ServiceCenterProtectedRoute>}/ >
 
           <Route path="dashboard" element={<ServiceCenterDashboard />} />
           <Route path="mechanic" element={<ServiceCenterMechanic />} />
@@ -113,9 +117,13 @@ function AppRoutes() {
           <Route path='subscription' element={<SubscriptionPage/>}/>
           <Route path='slot' element={<Slot/>}/>
         </Route>
+
+      
         <Route path="/mechanic/login" element={<MechanicLogin />} />
         <Route path="/mechanic/dashboard" element={<MechanicProtectedRoute><MechanicBashboard /></MechanicProtectedRoute>} />
         <Route path='/mechanic/bookings/:bookingId' element={<MechanicProtectedRoute><MechanicBookingDetails/></MechanicProtectedRoute>}/>
+        <Route path='/mechanic/bookings/:bookingId/chat' element={<MechanicProtectedRoute><MechanicChatPage/></MechanicProtectedRoute>}/>
+   
 
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminProtectedRoute><AdminLayout /></AdminProtectedRoute>}>

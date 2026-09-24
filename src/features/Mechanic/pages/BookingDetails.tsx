@@ -16,7 +16,7 @@ import {
   MapPin,
   MessageCircle,
 } from "lucide-react";
-import  PickUpMapView from "../../../shared/components/PickUpMapView"
+import PickUpMapView from "../../../shared/components/PickUpMapView";
 import { useMechanicBookingDetails } from "../hooks/useMechanicBookingDetail";
 
 /* ────────────────────────────────────────────────────────────────────────
@@ -132,7 +132,7 @@ export default function MechanicJobCardPage() {
       in_progress: "in-progress",
       completed: "completed",
     };
-    return map[raw.toLowerCase()] ?? "Assigned";
+    return map[raw.toLowerCase()] ?? "assigned";
   }
 
   useEffect(() => {
@@ -243,8 +243,8 @@ export default function MechanicJobCardPage() {
   const totalEstimatedTime = useMemo(() => summarizeEstimatedTime(items), [items]);
   const queryClient = useQueryClient();
 
-  const existingProofUrl =  booking?.proof?.imageUrl
-  const existingProofUploadedAt = booking?.proof?.uploadedAt
+  const existingProofUrl = booking?.proof?.imageUrl;
+  const existingProofUploadedAt = booking?.proof?.uploadedAt;
 
   function handleChat() {
     navigate(`/mechanic/bookings/${bookingId}/chat`);
@@ -264,39 +264,36 @@ export default function MechanicJobCardPage() {
       }));
       await updateJobItems(bookingId!, payload);
 
- 
-     
-
       queryClient.invalidateQueries({ queryKey: ["mechanic-booking-details", bookingId] });
     } finally {
       setIsSavingItems(false);
     }
   }
 
-async function handleUpdateStatus() {
-  setIsSavingStatus(true);
-  setProofError(null);
-  try {
-    await updateStatus(bookingId!, status!);
+  async function handleUpdateStatus() {
+    setIsSavingStatus(true);
+    setProofError(null);
+    try {
+      await updateStatus(bookingId!, status!);
 
-    if (status === "completed" && proofFile) {
-      try {
-        const formData = new FormData();
-        formData.append("proofImage", proofFile);
-        await uploadCompletionProof(bookingId!, formData);
-      
+      if (status === "completed" && proofFile) {
+        try {
+          const formData = new FormData();
+          formData.append("proofImage", proofFile);
+          await uploadCompletionProof(bookingId!, formData);
+
+          await queryClient.invalidateQueries({ queryKey: ["mechanic-booking-details", bookingId] });
+          handleRemoveProofSelection();
+        } catch {
+          setProofError("Upload failed — try again.");
+        }
+      } else {
         await queryClient.invalidateQueries({ queryKey: ["mechanic-booking-details", bookingId] });
-        handleRemoveProofSelection();
-      } catch {
-        setProofError("Upload failed — try again.");
       }
-    } else {
-      await queryClient.invalidateQueries({ queryKey: ["mechanic-booking-details", bookingId] });
+    } finally {
+      setIsSavingStatus(false);
     }
-  } finally {
-    setIsSavingStatus(false);
   }
-}
 
   if (isLoading) {
     return <div className="min-h-screen bg-[#060a14] text-white p-6">Loading...</div>;
@@ -380,13 +377,14 @@ async function handleUpdateStatus() {
 
                   <div className="mt-3 grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
                     <div className="font-dm-sans text-sm text-white/70">{booking.customerName}</div>
-                    <a
-                      href={`tel:${booking.customerPhone}`}
-                      className="flex items-center gap-1.5 font-dm-sans text-sm text-cyan-300 hover:text-cyan-200"
-                    >
-                      <Phone className="h-3.5 w-3.5" />
-                      {booking.customerPhone}
-                    </a>
+                    
+           <a          
+  href={`tel:${booking.customerPhone}`}
+  className="flex items-center gap-1.5 font-dm-sans text-sm text-cyan-300 hover:text-cyan-200"
+>
+  <Phone className="h-3.5 w-3.5" />
+  {booking.customerPhone}
+</a>
                     <div className="font-dm-sans text-sm text-white/50">{booking.schedule.date}</div>
                     <div className="font-dm-sans text-sm text-white/50">
                       {booking.schedule.slotStartingTime}
@@ -403,30 +401,31 @@ async function handleUpdateStatus() {
                 </div>
               </div>
             </SectionCard>
+
             {booking.visitType === "pickup-drop" && (
-  <SectionCard title="Pickup Location">
-    <div className="flex items-center gap-2 mb-3">
-      <MapPin className="h-4 w-4 text-cyan-400" />
-    </div>
-    {booking.pickupLocation ? (
-      <>
-        <p className="font-dm-sans text-sm text-white/70">
-          {booking.pickupLocation.formatedAddress}
-        </p>
-        <div className="mt-3 overflow-hidden rounded-xl border border-white/10">
-          <PickUpMapView
-            lat={booking.pickupLocation.coordinates[1]}
-            lng={booking.pickupLocation.coordinates[0]}
-          />
-        </div>
-      </>
-    ) : (
-      <p className="font-dm-sans text-sm text-white/40">
-        Pickup address not available.
-      </p>
-    )}
-  </SectionCard>
-)}
+              <SectionCard title="Pickup Location">
+                <div className="flex items-center gap-2 mb-3">
+                  <MapPin className="h-4 w-4 text-cyan-400" />
+                </div>
+                {booking.pickupLocation ? (
+                  <>
+                    <p className="font-dm-sans text-sm text-white/70">
+                      {booking.pickupLocation.formatedAddress}
+                    </p>
+                    <div className="mt-3 overflow-hidden rounded-xl border border-white/10">
+                      <PickUpMapView
+                        lat={booking.pickupLocation.coordinates[1]}
+                        lng={booking.pickupLocation.coordinates[0]}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <p className="font-dm-sans text-sm text-white/40">
+                    Pickup address not available.
+                  </p>
+                )}
+              </SectionCard>
+            )}
 
             {/* Reported issue */}
             <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
@@ -646,65 +645,65 @@ async function handleUpdateStatus() {
 
             {/* Completion proof */}
             <SectionCard title="Completion Proof" subtitle="Upload a photo showing the completed work.">
-  {existingProofUrl ? (
-    <div>
-      <img
-        src={existingProofUrl}
-        alt="Completion proof"
-        className="w-full max-h-64 rounded-xl border border-white/10 object-cover"
-      />
-      <p className="mt-2 font-dm-sans text-xs text-white/40">
-        Uploaded {existingProofUploadedAt ? new Date(existingProofUploadedAt).toLocaleString() : ""}
-      </p>
-    </div>
-  ) : status !== "completed" ? (
-    <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-white/10 px-4 py-8 text-center opacity-50">
-      <Camera className="h-6 w-6 text-white/30" />
-      <p className="font-dm-sans text-sm text-white/40">
-        You'll be able to upload proof once the job is marked Completed.
-      </p>
-    </div>
-  ) : proofPreviewUrl ? (
-    <div className="relative w-fit">
-      <img
-        src={proofPreviewUrl}
-        alt="Selected proof"
-        className="h-32 rounded-xl border border-white/10 object-cover"
-      />
-      <button
-        onClick={handleRemoveProofSelection}
-        aria-label="Remove selected image"
-        className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white hover:bg-red-400"
-      >
-        <X className="h-3.5 w-3.5" />
-      </button>
-    </div>
-  ) : (
-    <div
-      onClick={() => proofInputRef.current?.click()}
-      onDragOver={handleProofDragOver}
-      onDragLeave={handleProofDragLeave}
-      onDrop={handleProofDrop}
-      className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-8 text-center transition ${
-        isDraggingProof ? "border-cyan-400/50 bg-cyan-400/5" : "border-white/15 hover:border-white/25"
-      }`}
-    >
-      <Camera className="h-6 w-6 text-white/40" />
-      <p className="font-dm-sans text-sm text-white/50">Click or drag a photo here</p>
-      <input
-        ref={proofInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={(e) => handleProofFileSelect(e.target.files?.[0] ?? null)}
-      />
-    </div>
-  )}
+              {existingProofUrl ? (
+                <div>
+                  <img
+                    src={existingProofUrl}
+                    alt="Completion proof"
+                    className="w-full max-h-64 rounded-xl border border-white/10 object-cover"
+                  />
+                  <p className="mt-2 font-dm-sans text-xs text-white/40">
+                    Uploaded {existingProofUploadedAt ? new Date(existingProofUploadedAt).toLocaleString() : ""}
+                  </p>
+                </div>
+              ) : status !== "completed" ? (
+                <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-white/10 px-4 py-8 text-center opacity-50">
+                  <Camera className="h-6 w-6 text-white/30" />
+                  <p className="font-dm-sans text-sm text-white/40">
+                    You'll be able to upload proof once the job is marked Completed.
+                  </p>
+                </div>
+              ) : proofPreviewUrl ? (
+                <div className="relative w-fit">
+                  <img
+                    src={proofPreviewUrl}
+                    alt="Selected proof"
+                    className="h-32 rounded-xl border border-white/10 object-cover"
+                  />
+                  <button
+                    onClick={handleRemoveProofSelection}
+                    aria-label="Remove selected image"
+                    className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white hover:bg-red-400"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <div
+                  onClick={() => proofInputRef.current?.click()}
+                  onDragOver={handleProofDragOver}
+                  onDragLeave={handleProofDragLeave}
+                  onDrop={handleProofDrop}
+                  className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-8 text-center transition ${
+                    isDraggingProof ? "border-cyan-400/50 bg-cyan-400/5" : "border-white/15 hover:border-white/25"
+                  }`}
+                >
+                  <Camera className="h-6 w-6 text-white/40" />
+                  <p className="font-dm-sans text-sm text-white/50">Click or drag a photo here</p>
+                  <input
+                    ref={proofInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleProofFileSelect(e.target.files?.[0] ?? null)}
+                  />
+                </div>
+              )}
 
-  {proofError && (
-    <p className="mt-2 font-dm-sans text-xs text-red-400">{proofError}</p>
-  )}
-</SectionCard>
+              {proofError && (
+                <p className="mt-2 font-dm-sans text-xs text-red-400">{proofError}</p>
+              )}
+            </SectionCard>
 
             {/* Status */}
             <SectionCard title="Update Status">

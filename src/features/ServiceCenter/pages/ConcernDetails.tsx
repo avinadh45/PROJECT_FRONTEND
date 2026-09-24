@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Phone } from "lucide-react";
+import { ArrowLeft, Phone, MessageCircle } from "lucide-react";
 import { useConcernDetail, useRespondToConcern } from "../hooks/useConcerns";
 
 export default function ConcernDetailPage() {
@@ -20,6 +20,7 @@ export default function ConcernDetailPage() {
     if (!rejectReason.trim()) return;
     respondMutation.mutate({ rejected: true, rejectReason: rejectReason.trim() });
   };
+  const handleChat = () => navigate(`/service-center/chat/${concernId}`);
 
   return (
     <div className="min-h-screen w-full pb-16" style={{ background: "#060a14" }}>
@@ -44,7 +45,15 @@ export default function ConcernDetailPage() {
         </div>
 
         <div className="mt-4 rounded-xl border border-white/10 bg-[#0a0f1e] p-4">
-          <p className="mb-2 text-xs uppercase tracking-wide text-slate-500">Customer</p>
+          <div className="flex items-center justify-between">
+            <p className="mb-2 text-xs uppercase tracking-wide text-slate-500">Customer</p>
+            <button
+              onClick={handleChat}
+              className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-xs font-medium text-cyan-300 hover:bg-cyan-400/20"
+            >
+              <MessageCircle className="h-3.5 w-3.5" /> Chat
+            </button>
+          </div>
           <p className="text-white">{concern.customerName}</p>
           <a href={`tel:${concern.customerPhone}`} className="mt-1 flex items-center gap-1.5 text-sm text-cyan-400 hover:underline">
             <Phone className="h-3.5 w-3.5" /> {concern.customerPhone}

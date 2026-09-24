@@ -4,6 +4,7 @@ import {
   Camera,
   CheckCircle2,
   Clock,
+  MessageCircle,
   Video,
   XCircle,
 } from "lucide-react";
@@ -106,7 +107,16 @@ export default function ConcernDetailsPage() {
         <h1 className="text-3xl text-white" style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700 }}>
           Concern Details
         </h1>
-        <StatusPill status={status} />
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => navigate(`/concerns/${concern.id}/chat`)}
+            className="inline-flex items-center gap-1.5 rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1.5 text-xs font-medium text-cyan-300 transition-colors hover:bg-cyan-400/20"
+          >
+            <MessageCircle className="h-3.5 w-3.5" />
+            Chat
+          </button>
+          <StatusPill status={status} />
+        </div>
       </div>
 
       <div className="space-y-6">

@@ -29,7 +29,7 @@ import type {
 import axiosClient from "../../../shared/api/axiosClient";
 import { API_ROUTES } from "../../../shared/api/apiRoutes";
 import type { ActiveSubscription, Subscription } from "../types/subscription";
-import type { AvailabilityFormDat } from "../types/slot";
+
 
 export const useServiceCenterAuth = () => {
   const [loading, setLoading] = useState(false);

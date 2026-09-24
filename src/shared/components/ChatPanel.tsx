@@ -1,17 +1,23 @@
-
-import { useEffect,useRef,useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Send } from "lucide-react";
 import { useChatConversation } from "../hook/useChatConversation";
+
+function initialsFrom(label: string) {
+  const parts = label.trim().split(/\s+/);
+  return (parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "");
+}
 
 export default function ChatPanel({
   bookingId,
   concernId,
   currentUserId,
+  currentUserRole,
   otherParticipantLabel,
 }: {
   bookingId?: string;
   concernId?: string;
   currentUserId: string;
+  currentUserRole: "user" | "serviceCenter" | "mechanic";
   otherParticipantLabel: string;
 }) {
   const { messages, isJoining, error, hasMore, loadMore, sendMessage, markRead } = useChatConversation({
@@ -29,54 +35,81 @@ export default function ChatPanel({
   }, [messages]);
 
   if (isJoining) {
-    return <div className="p-6 text-center text-sm text-slate-500">Connecting…</div>;
+    return (
+      <div className="flex h-full items-center justify-center rounded-xl border border-white/10 bg-[#0a0f1e]">
+        <p className="text-sm text-slate-500">Connecting…</p>
+      </div>
+    );
   }
 
   if (error) {
     return (
-      <div className="p-6 text-center text-sm text-slate-500">
-        {error === "Chat will be available once a mechanic is assigned."
-          ? error
-          : "Chat is currently unavailable."}
+      <div className="flex h-full items-center justify-center rounded-xl border border-white/10 bg-[#0a0f1e] px-6 text-center">
+        <p className="text-sm text-slate-500">
+          {error === "Chat will be available once a mechanic is assigned."
+            ? error
+            : "Chat is currently unavailable."}
+        </p>
       </div>
     );
   }
 
   function handleSend() {
+    if (!input.trim()) return;
     sendMessage(input);
     setInput("");
   }
 
   return (
-    <div className="flex h-full flex-col rounded-xl border border-white/10 bg-[#0a0f1e]">
-      <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
-        <span className="h-2 w-2 rounded-full bg-emerald-400" />
-        <p className="text-sm font-semibold text-white">Chat with {otherParticipantLabel}</p>
+    <div className="flex h-full flex-col overflow-hidden rounded-xl border border-white/10 bg-[#0a0f1e]">
+      {/* Header */}
+      <div className="flex items-center gap-3 border-b border-white/10 bg-white/[0.02] px-5 py-3.5">
+        <div
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
+          style={{ background: "linear-gradient(135deg, #3b82f6, #06b6d4)" }}
+        >
+          {initialsFrom(otherParticipantLabel)}
+        </div>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-white">{otherParticipantLabel}</p>
+          <div className="flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            <p className="text-xs text-white/40">Online</p>
+          </div>
+        </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-3">
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto px-5 py-4">
         {hasMore && (
-          <button onClick={loadMore} className="mb-3 w-full text-center text-xs text-cyan-400 hover:underline">
+          <button
+            onClick={loadMore}
+            className="mb-4 w-full rounded-lg border border-white/10 py-1.5 text-center text-xs text-cyan-400 hover:bg-white/5"
+          >
             Load earlier messages
           </button>
         )}
 
         {messages.length === 0 ? (
-          <p className="py-10 text-center text-sm text-slate-500">Start the conversation — say hello!</p>
+          <div className="flex h-full items-center justify-center py-10">
+            <p className="text-sm text-slate-500">Start the conversation — say hello!</p>
+          </div>
         ) : (
           <div className="flex flex-col gap-2">
             {messages.map((m) => {
-              const isOwn = m.id === currentUserId;
+              const isOwn = m.senderRole === currentUserRole;
               return (
                 <div key={m.id} className={`flex ${isOwn ? "justify-end" : "justify-start"}`}>
                   <div
-                    className={`max-w-[75%] rounded-xl px-3 py-2 text-sm ${
-                      isOwn ? "text-white" : "bg-white/5 text-slate-200"
+                    className={`max-w-[70%] px-3.5 py-2 text-sm shadow-sm ${
+                      isOwn
+                        ? "rounded-2xl rounded-br-sm text-white"
+                        : "rounded-2xl rounded-bl-sm border border-white/5 bg-white/5 text-slate-200"
                     }`}
                     style={isOwn ? { background: "linear-gradient(135deg, #3b82f6, #06b6d4)" } : undefined}
                   >
-                    <p>{m.text}</p>
-                    <p className="mt-1 text-[10px] opacity-60">
+                    <p className="whitespace-pre-wrap break-words leading-relaxed">{m.text}</p>
+                    <p className={`mt-1 text-[10px] ${isOwn ? "text-white/70" : "text-white/40"} text-right`}>
                       {new Date(m.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                     </p>
                   </div>
@@ -88,23 +121,26 @@ export default function ChatPanel({
         )}
       </div>
 
-      <div className="flex items-center gap-2 border-t border-white/10 p-3">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSend()}
-          placeholder="Type a message…"
-          className="flex-1 rounded-lg border border-white/10 bg-[#060a14] px-3 py-2 text-sm text-white placeholder:text-slate-600 focus:border-cyan-400/60 focus:outline-none"
-        />
-        <button
-          onClick={handleSend}
-          disabled={!input.trim()}
-          className="rounded-lg p-2 text-white disabled:opacity-40"
-          style={{ background: "linear-gradient(135deg, #3b82f6, #06b6d4)" }}
-        >
-          <Send className="h-4 w-4" />
-        </button>
+      {/* Input */}
+      <div className="border-t border-white/10 bg-white/[0.02] p-3">
+        <div className="flex items-center gap-2 rounded-full border border-white/10 bg-[#060a14] px-2 py-1.5 focus-within:border-cyan-400/60">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSend()}
+            placeholder="Type a message"
+            className="flex-1 bg-transparent px-2 text-sm text-white placeholder:text-slate-600 focus:outline-none"
+          />
+          <button
+            onClick={handleSend}
+            disabled={!input.trim()}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white transition-opacity disabled:opacity-30"
+            style={{ background: "linear-gradient(135deg, #3b82f6, #06b6d4)" }}
+          >
+            <Send className="h-3.5 w-3.5" />
+          </button>
+        </div>
       </div>
     </div>
   );

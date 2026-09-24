@@ -61,7 +61,8 @@ export const API_ROUTES = {
     BOOKING_DETAILS:(bookingId:string)=>`/mechanic/bookings/${bookingId}`,
     UPDATE_JOB:(bookingId:string)=>`/mechanic/bookings/${bookingId}/job`,
     UPDATE_STATUS:(bookingId:string)=>`/mechanic/bookings/${bookingId}/status`,
-    UPLOAD_PROOF:(bookingId:string)=>`/mechanic/bookings/${bookingId}/proof`
+    UPLOAD_PROOF:(bookingId:string)=>`/mechanic/bookings/${bookingId}/proof`,
+    ME:`/mechanic/me`
   },
   ADMIN: {
     LOGIN: "/admin/login",

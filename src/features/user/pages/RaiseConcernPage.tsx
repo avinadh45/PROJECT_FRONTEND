@@ -37,8 +37,8 @@ export default function RaiseConcernPage() {
     setError(null);
     setIsSubmitting(true);
     try {
-      await createConcern(bookingId, issueTitle.trim(), description.trim(), imageFile, videoFile);
-      navigate(`/booking/${bookingId}`, { state: { concernSubmitted: true } });
+      const response =   await createConcern(bookingId, issueTitle.trim(), description.trim(), imageFile, videoFile);
+      navigate(`/concerns/${response.id}`, { state: { concernSubmitted: true } });
     } catch (err: any) {
       const message = err?.response?.data?.message;
       if (message?.includes("already")) {

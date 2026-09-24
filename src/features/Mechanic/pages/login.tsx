@@ -3,8 +3,9 @@
 // Stack: React + TypeScript + Tailwind + inline styles for custom tokens
 
 import React, { useState, useEffect } from "react";
-import { useMechanicAuth } from '../hooks/useMechanicAuth';
+//import { useMechanicAuth } from '../hooks/useMechanicAuth';
 import { useNavigate } from "react-router-dom";
+import { useMechanicAuth } from "../context/MechanicAuthContext";
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 const MailIcon = () => (

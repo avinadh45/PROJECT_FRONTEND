@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import {  useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Search,
@@ -34,10 +34,10 @@ type BookingStatus =
   type PaymentStatus ="pending" | "paid" | "failed" | "refund_due" | "refunded";
 type VisitType = "drive-in" | "pickup-drop";
 
-interface AdvancePayment {
-  status: PaymentStatus;
-  amount?: number;
-}
+// interface AdvancePayment {
+//   status: PaymentStatus;
+//   amount?: number;
+// }
 
 interface Booking {
   id: string;

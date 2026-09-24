@@ -31,6 +31,7 @@ export function useChatConversation({bookingId,concernId,currentUserId}:UseChatC
             loadHistory(conversationId, 1, true);
         }
         function handleError({message}:{message:string}){
+             console.error("chat:error received:", message);  
             setError(message)
             setIsJoining(false)
         }

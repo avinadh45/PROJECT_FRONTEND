@@ -2,7 +2,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Navbar } from "../components/Navbar";
 import ChatPanel from "../../../shared/components/ChatPanel";
-import { useUserBookingDetails } from "../hooks/useMyBookings";
+
+import { useUserConcernDetails } from "../queries/useConcern";
 import { useAuth } from "../context/AuthContext";
 
 const navLinks = [
@@ -14,11 +15,11 @@ const navLinks = [
 ];
 
 export default function BookingChatPage() {
-  const { bookingId } = useParams<{ bookingId: string }>();
+  const { concernId } = useParams<{ concernId: string }>();
   const navigate = useNavigate();
   const { user, logoutuser } = useAuth();
 
-  const { data: booking, isLoading } = useUserBookingDetails(bookingId as string);
+  const { data: concern, isLoading } = useUserConcernDetails(concernId as string);
 
   if (isLoading) {
     return (
@@ -35,7 +36,7 @@ export default function BookingChatPage() {
       </div>
     );
   }
-  if (!booking) {
+  if (!concern) {
     return (
       <div className="min-h-screen bg-[#060a14] text-white">
         <Navbar
@@ -71,18 +72,18 @@ export default function BookingChatPage() {
         </button>
         <div>
           <p className="text-sm font-semibold text-white">
-            {booking.vehicleRegistrationNumber} · {booking.categoryName}
+            {concern?.vehicleRegistrationNumber} · {concern?.categoryName}
           </p>
-          <p className="text-xs text-white/40">{booking.garageName}</p>
+          <p className="text-xs text-white/40">{concern?.garageName}</p>
         </div>
       </div>
 
       <div className="flex-1 overflow-hidden px-4 py-4 sm:px-6">
         <ChatPanel
-          bookingId={bookingId}
+          concernId={concernId}
           currentUserId={user!.id}
           currentUserRole="user"
-          otherParticipantLabel={booking.mechanicName ?? "Mechanic"}
+          otherParticipantLabel={concern?.garageName ?? "Mechanic"}
         />
       </div>
     </div>
